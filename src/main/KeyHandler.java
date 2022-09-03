@@ -4,8 +4,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
-    private boolean escPressed;
-    private boolean escTapped;
+    private boolean escPressed = false;
+    private boolean escTapped = false;
+    final GamePanel gp;
+
+    //Constructor
+    public KeyHandler(GamePanel gp) {
+        this.gp = gp;
+    }
 
     //accessors
     public boolean getEscPressed() {return escPressed;}

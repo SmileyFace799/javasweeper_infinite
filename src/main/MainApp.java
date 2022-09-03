@@ -8,7 +8,7 @@ public class MainApp {
         JFrame window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
-        window.setTitle("gayming B)");
+        window.setTitle("Javasweeper Infinite");
 
         GamePanel game = new GamePanel();
         window.add(game);
