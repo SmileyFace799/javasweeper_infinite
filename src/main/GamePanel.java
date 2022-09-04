@@ -1,16 +1,19 @@
 package main;
 
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import squares.Square;
 import squares.BombSquare;
 import squares.NumberSquare;
 
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 public class GamePanel extends JPanel implements Runnable{
@@ -45,6 +48,11 @@ public class GamePanel extends JPanel implements Runnable{
 
     //Constructor
     public GamePanel() {
+        DataHandler settings = new DataHandler<String, Object>("settings");
+        settings.put("bruh", "69");
+        String a = (String) settings.get("bruh");
+        System.out.println(a);
+
         mouseH = new MouseHandler(this);
         mouseMH = new MouseMotionHandler(this);
         keyH = new KeyHandler(this);
@@ -60,9 +68,7 @@ public class GamePanel extends JPanel implements Runnable{
             for (String name: fileNames) {
                 txMap.put(name, ImageIO.read(getClass().getResourceAsStream("/imgs/" + name + ".bmp")));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) {e.printStackTrace();}
         Point startPoint = new Point(0, 0);
         this.generateSquare(startPoint, 0);
         getSquare(startPoint).reveal(0);
