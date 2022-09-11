@@ -1,37 +1,34 @@
 package squares;
 
-import main.GamePanel;
-import main.KeyHandler;
-import main.MouseHandler;
+import main.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
-public class Square {
-    final Point pos;
+public class Square implements JSONEndoce {
+    final int x;
+    final int y;
     final int size;
 
-    final GamePanel gp;
-    final MouseHandler mouseH;
-    final KeyHandler keyH;
-    final HashMap<String, BufferedImage> txMap;
+    final Board board;
+    final TxMap txMap;
 
     private BufferedImage tx;
     private boolean revealed = false;
     private boolean flagged = false;
 
-    public Square(Point pos, GamePanel gp, MouseHandler mouseH, KeyHandler keyH, HashMap<String, BufferedImage> txMap) {
-        this.pos = pos;
-        this.size = gp.getTileSize();
-        this.gp = gp;
-        this.mouseH = mouseH;
-        this.keyH = keyH;
+    public Square(int x, int y, Board board, TxMap txMap) {
+        this.x = x;
+        this.y = y;
+        this.size = board.getTileSize();
+        this.board = board;
         this.txMap = txMap;
-        this.tx = txMap.get("hidden");
+        this.tx = txMap.getScaled(size, "hidden");
     }
 
     //Accessors
+    public BufferedImage getTx() {return tx;}
     public boolean isRevealed() {return revealed;}
     public boolean isFlagged() {return flagged;}
 
@@ -40,23 +37,32 @@ public class Square {
 
     //Other
     public void draw(Graphics2D g2, Point cameraOffset) {
-        Point drawPos = new Point(pos.x * size - cameraOffset.x, pos.y * size - cameraOffset.y);
-        if (g2.hitClip(drawPos.x, drawPos.y, size, size)) {
-            g2.drawImage(tx, pos.x * size - cameraOffset.x, pos.y * size - cameraOffset.y, size, size, null);
+        int realX = x * size - cameraOffset.x;
+        int realY = y * size - cameraOffset.y;
+        if (g2.hitClip(realX, realY, size, size)) {
+            g2.drawImage(tx, realX, realY, null);
         }
     }
 
-    public void reveal() {reveal(gp.getMineChance());}
-    public void reveal(double mineChance) {
-        if (!revealed && !flagged) {revealed = true;}
-    }
+    public void reveal() {if (!revealed && !flagged) {
+        revealed = true;
+        board.updateImage(x, y, this);
+    }}
 
     public void flag() {
         flagged = !flagged;
         if (flagged) {
-            setTx(txMap.get("flag"));
+            setTx(txMap.getScaled(size, "flag"));
         } else {
-            setTx(txMap.get("hidden"));
+            setTx(txMap.getScaled(size, "hidden"));
         }
+        board.updateImage(x, y, this);
+    }
+
+    @Override
+    public HashMap<String, Object> JSONEncode() {
+        HashMap<String, Object> jsonMap = new HashMap<>();
+        jsonMap.put("class", getClass());
+        return jsonMap;
     }
 }

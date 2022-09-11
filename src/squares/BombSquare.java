@@ -1,24 +1,19 @@
 package squares;
 
-import main.GamePanel;
-import main.KeyHandler;
-import main.MouseHandler;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.HashMap;
+import main.Board;
+import main.TxMap;
 
 public class BombSquare extends Square{
 
-    public BombSquare(Point pos, GamePanel gp, MouseHandler mouseH, KeyHandler keyH, HashMap<String, BufferedImage> txMap) {
-        super(pos, gp, mouseH, keyH, txMap);
+    public BombSquare(int x, int y, Board board, TxMap txMap) {
+        super(x, y, board, txMap);
     }
 
     @Override
-    public void reveal(double mineChance) {
+    public void reveal() {
         if (!this.isRevealed() && !this.isFlagged()) {
-            this.setTx(txMap.get("bombDetonated"));
-            super.reveal(mineChance);
+            this.setTx(txMap.getScaled(size, "bombDetonated"));
+            super.reveal();
         }
     }
 }

@@ -25,7 +25,10 @@ public class MouseHandler implements MouseListener {
     //mutators
     public void frameUpdated() {
         for (String button: mouseButtons) {
-            if (clicked.get(button)) {clicked.put(button, false);}
+            if (clicked.get(button)) {
+                clicked.put(button, false);
+                gp.board.save();
+            }
         }
     }
 
@@ -75,13 +78,13 @@ public class MouseHandler implements MouseListener {
             }
             case MouseEvent.BUTTON2 -> {
                 pressed.put("wheel", false);
-                if (System.nanoTime() < pressTime.get("wheel") + (long) (0.15 * 1e9)) {
+                if (System.nanoTime() < pressTime.get("wheel") + (long) (0.2 * 1e9)) {
                     clicked.put("wheel", true);
                 }
             }
             case MouseEvent.BUTTON3 -> {
                 pressed.put("rmb", false);
-                if (System.nanoTime() < pressTime.get("rmb") + (long) (0.1 * 1e9)) {
+                if (System.nanoTime() < pressTime.get("rmb") + (long) (0.15 * 1e9)) {
                     clicked.put("rmb", true);
                 }
             }

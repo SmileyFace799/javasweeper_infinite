@@ -1,1 +1,17 @@
-{"bruh": {"yes":  true, "no":  false}, "gaming": {"bruh": 69}}
+{
+  "-1": {
+    "-1": "bombFlagged",
+    "0": "hidden",
+    "1": "bombFlagged"
+  },
+  "0": {
+    "-1": "hidden",
+    "0": "4",
+    "1": "hidden"
+  },
+  "1": {
+    "-1": "bombFlagged",
+    "0": "hidden",
+    "1": "bombFlagged"
+  }
+}

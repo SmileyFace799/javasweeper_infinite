@@ -32,9 +32,12 @@ public class KeyHandler implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
-        if (code == KeyEvent.VK_ESCAPE) {
-            escPressed = true;
-            escTapped = true;
+        switch (code) {
+            case KeyEvent.VK_ESCAPE -> {
+                escPressed = true;
+                escTapped = true;
+            }
+            case KeyEvent.VK_F3 -> gp.toggleDebug();
         }
     }
 
