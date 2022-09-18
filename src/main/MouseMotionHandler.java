@@ -14,19 +14,11 @@ public class MouseMotionHandler implements MouseMotionListener {
 
   @Override
   public void mouseDragged(MouseEvent e) {
-    if (gp.mouseH.pressed.get("wheel")
-        && System.nanoTime() > gp.mouseH.pressTime.get("wheel") + (long) (0.15 * 1e9)
-    ) {
-      Point cameraOffset = new Point(gp.getStartDragCamera());
-      Point startDragPos = gp.mouseH.pressPos.get("wheel");
-      Point pos = e.getPoint();
-      cameraOffset.x += startDragPos.x - pos.x;
-      cameraOffset.y += startDragPos.y - pos.y;
-      gp.setCameraOffset(cameraOffset);
-    }
+    gp.stateH.getActive().mouseDragged(e);
   }
 
   @Override
   public void mouseMoved(MouseEvent e) {
+    gp.stateH.getActive().mouseMoved(e);
   }
 }

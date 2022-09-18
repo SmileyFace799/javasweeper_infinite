@@ -20,6 +20,7 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
   final GamePanel gp;
   final int tileSize;
   private BufferedImage image;
+  private String associatedFilename;
 
   private int minX;
   private int minY;
@@ -27,7 +28,7 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
   private int maxY;
 
 
-  public Board(GamePanel gp) { //Defaults to 0 mineChace
+  public Board(GamePanel gp) { //Defaults to 0 mineChance
     this.mineChance = 0;
     this.gp = gp;
     this.tileSize = gp.tileSize;
@@ -39,7 +40,7 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
     this.tileSize = gp.tileSize;
   }
 
-  //Accesors
+  //Accessors
   public int getMinX() {
     return minX;
   }
@@ -237,6 +238,7 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
   }
 
   public void load(String filename) {
+    associatedFilename = filename;
     try {
       BufferedReader br = new BufferedReader(new FileReader(filename));
       String boardStr = br.readLine();
@@ -288,8 +290,12 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
   }
 
   public void save() {
+    if (associatedFilename == null) {
+      System.out.println("No filename is associated with this board");
+      return;
+    }
     try {
-      BufferedWriter bw = new BufferedWriter(new FileWriter("testboard.board"));
+      BufferedWriter bw = new BufferedWriter(new FileWriter(associatedFilename));
       StringBuilder boardStr = new StringBuilder();
       for (int x : this.keySet()) {
         for (int y : get(x).keySet()) {

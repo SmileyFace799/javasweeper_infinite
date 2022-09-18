@@ -27,7 +27,6 @@ public class MouseHandler implements MouseListener {
     for (String button : mouseButtons) {
       if (clicked.get(button)) {
         clicked.put(button, false);
-        gp.board.save();
       }
     }
   }
@@ -42,6 +41,7 @@ public class MouseHandler implements MouseListener {
       default -> {
       }
     }
+    gp.stateH.getActive().mouseClicked(e);
   }
 
   @Override
@@ -68,6 +68,7 @@ public class MouseHandler implements MouseListener {
       default -> {
       }
     }
+    gp.stateH.getActive().mousePressed(e);
   }
 
   @Override
@@ -95,13 +96,16 @@ public class MouseHandler implements MouseListener {
       default -> {
       }
     }
+    gp.stateH.getActive().mouseReleased(e);
   }
 
   @Override
   public void mouseEntered(MouseEvent e) {
+    gp.stateH.getActive().mouseEntered(e);
   }
 
   @Override
   public void mouseExited(MouseEvent e) {
+    gp.stateH.getActive().mouseExited(e);
   }
 }

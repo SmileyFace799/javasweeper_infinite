@@ -43,6 +43,19 @@ public class TxMap extends HashMap<String, BufferedImage> {
     return scaledImage;
   }
 
+  public BufferedImage getRelScaled(double sizeMultiplier, String name) {
+    return getRelScaled(sizeMultiplier, sizeMultiplier, name);
+  }
+
+  public BufferedImage getRelScaled(double widthMultiplier, double heightMultiplier, String name) {
+    BufferedImage originalImage = this.get(name);
+    return getScaled(
+        (int) Math.round(originalImage.getWidth() * widthMultiplier),
+        (int) Math.round(originalImage.getHeight() * heightMultiplier),
+        originalImage
+    );
+  }
+
   //Mutators
   public void load() {
     addFiles(imgPath);

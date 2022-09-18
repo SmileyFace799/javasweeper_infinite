@@ -1,33 +1,38 @@
 package main;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.*;
 import java.util.HashMap;
-import javax.swing.JPanel;
+import javax.swing.*;
+
 import squares.NumberSquare;
-import squares.Square;
 
 public class GamePanel extends JPanel implements Runnable {
 
   //CONSTANTS
+  final JFrame window;
   final int originalTileSize = 16;
+
+  final int STATE_GAME = 0;
+  final int STATE_GAMEOVER = 1;
+  final int STATE_PAUSED = 2;
+  final int STATE_SETTINGS = 3;
 
   private Thread gameThread;
   final MouseHandler mouseH;
   final MouseMotionHandler mouseMotionH;
   final KeyHandler keyH;
+  final StateHandler stateH;
+  final UI ui;
 
   final TxMap txMap = new TxMap("imgs");
 
   //SETTINGS (configurable)
   final int screenWidth;
   final int screenHeight;
-  final double scale;
+  final double boardScale;
   final int tileSize;
   final double mineChance;
+  final double uiScale;
 
   //FPS
   int fps = 60;
@@ -37,26 +42,28 @@ public class GamePanel extends JPanel implements Runnable {
   private Point cameraOffset;
   private Point startDragCamera;
   final HashMap<String, Point> clickedBoardPoints = new HashMap<>();
-  private boolean gamePaused = false;
   private boolean debugEnabled = false;
 
   //Constructor
-  public GamePanel() {
-    JsonMap<Object> settings = new JsonMap<>("settings.json");
+  public GamePanel(JFrame window) {
+    this.window = window;
+
+    JsonMap<Object> settings = new JsonMap<>("res/settings.json");
     screenWidth = (int) settings.get("screenWidth");
     screenHeight = (int) settings.get("screenHeight");
-    scale = (double) settings.get("UIScale");
-    tileSize = (int) Math.round(originalTileSize * scale);
+    boardScale = (double) settings.get("boardScale");
+    tileSize = (int) Math.round(originalTileSize * boardScale);
     mineChance = ((double) settings.get("mineChance")) / 100;
+    uiScale = (double) settings.get("UIScale");
     cameraOffset = new Point(-(screenWidth - tileSize) / 2, -(screenHeight - tileSize) / 2);
-
-    settings.put("bruh", "69");
-    String a = (String) settings.get("bruh");
-    System.out.println(a);
 
     mouseH = new MouseHandler(this);
     mouseMotionH = new MouseMotionHandler(this);
     keyH = new KeyHandler(this);
+    stateH = new StateHandler();
+    ui = new UI(this);
+
+    window.setSize(new Dimension(screenWidth, screenHeight));
     this.setPreferredSize(new Dimension(screenWidth, screenHeight));
     this.setDoubleBuffered(true);
     this.setFocusable(true);
@@ -65,8 +72,12 @@ public class GamePanel extends JPanel implements Runnable {
     this.addMouseMotionListener(mouseMotionH);
     this.addKeyListener(keyH);
 
+    stateH.addState(STATE_GAME, new GameState(this));
+    stateH.addState(STATE_PAUSED, new PauseState(this));
+    stateH.addState(STATE_SETTINGS, new SettingsState(this));
+
     board = new Board(mineChance, this);
-    board.load("testboard.board");
+    board.load("res/testboard.board");
 
     if (!board.exists(0, 0)) {
       board.generate(0, 0, 0);
@@ -79,14 +90,6 @@ public class GamePanel extends JPanel implements Runnable {
   }
 
   //accessors
-  public int getScreenWidth() {
-    return screenWidth;
-  }
-
-  public int getScreenHeight() {
-    return screenHeight;
-  }
-
   public Point getCameraOffset() {
     return cameraOffset;
   }
@@ -137,61 +140,7 @@ public class GamePanel extends JPanel implements Runnable {
   }
 
   public void update() {
-
-    for (String button : mouseH.mouseButtons) {
-      if (mouseH.clicked.get(button)) {
-        Point pressPos = mouseH.pressPos.get(button);
-        clickedBoardPoints.get(button).setLocation(
-                Math.floorDiv((pressPos.x + cameraOffset.x), tileSize),
-                Math.floorDiv((pressPos.y + cameraOffset.y), tileSize)
-        );
-      }
-    }
-
-    if (mouseH.clicked.get("lmb")) {
-      if (!board.exists(clickedBoardPoints.get("lmb"))) {
-        board.generate(clickedBoardPoints.get("lmb"));
-      }
-      board.get(clickedBoardPoints.get("lmb")).reveal();
-    }
-    if (mouseH.clicked.get("rmb") && board.exists(clickedBoardPoints.get("rmb"))) {
-      Square clickedSquare = board.get(clickedBoardPoints.get("rmb"));
-      if (!clickedSquare.isRevealed()) {
-        clickedSquare.flag();
-      }
-    } else if (mouseH.clicked.get("wheel")) {
-      Point pos = clickedBoardPoints.get("wheel"); //pos: Location clicked by the mouse-wheel
-      Square clickedSquare = board.get(pos);
-      if (
-              this.board.exists(pos)
-              && clickedSquare instanceof NumberSquare clickedNum
-              && clickedNum.isRevealed()
-      ) {
-        int flagCounter = 0; //Number of flags surrounding the number
-        for (int x = pos.x - 1; x <= pos.x + 1; x++) {
-          for (int y = pos.y - 1; y <= pos.y + 1; y++) {
-            if (board.get(x, y).isFlagged()) {
-              flagCounter++;
-            }
-          }
-        }
-        if (clickedNum.getNumber() == flagCounter) {
-          for (int x = pos.x - 1; x <= pos.x + 1; x++) {
-            for (int y = pos.y - 1; y <= pos.y + 1; y++) {
-              Square squareToReveal = board.get(x, y);
-              if (!squareToReveal.isFlagged()) {
-                squareToReveal.reveal();
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if (keyH.getEscTapped()) {
-      gamePaused = !gamePaused;
-    }
-
+    stateH.getActive().update();
     mouseH.frameUpdated();
     keyH.frameUpdated();
   }
@@ -200,26 +149,17 @@ public class GamePanel extends JPanel implements Runnable {
     super.paintComponent(g);
 
     Graphics2D g2 = (Graphics2D) g;
-    g2.setColor(Color.white);
+    g2.setFont(ui.font);
     long drawStart = System.nanoTime();
-    /*
-    for (int x: board.keySet()) {
-      for (int y: board.get(x).keySet()) {
-        board.get(x, y).draw(g2, cameraOffset);
-      }
-    }
-     */
 
-    g2.drawImage(board.getImage(),
-            board.getMinX() * tileSize - cameraOffset.x,
-            board.getMinY() * tileSize - cameraOffset.y,
-            null
-    );
+    stateH.getActive().drawScreen(g2);
 
     if (debugEnabled) {
+      g2.setColor(Color.white);
+      g2.setFont(ui.defaultFont);
       long drawTime = (System.nanoTime() - drawStart);
       g2.drawString("Draw time: " + (drawTime / 1e6) + "ms", 10, 20);
-      System.out.println("Effective FPS: " + (1e9 / drawTime));
+      g2.drawString("Effective FPS: " + (1e9 / drawTime), 10, 40);
     }
 
     g2.dispose();

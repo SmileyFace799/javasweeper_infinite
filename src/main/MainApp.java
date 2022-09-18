@@ -1,6 +1,5 @@
 package main;
 
-import java.awt.Dimension;
 import javax.swing.JFrame;
 
 public class MainApp {
@@ -10,9 +9,8 @@ public class MainApp {
     window.setResizable(false);
     window.setTitle("Javasweeper Infinite");
 
-    GamePanel game = new GamePanel();
+    GamePanel game = new GamePanel(window);
     window.add(game);
-    window.setSize(new Dimension(game.getScreenWidth(), game.getScreenHeight()));
 
     window.setLocationRelativeTo(null);
     window.setVisible(true);
