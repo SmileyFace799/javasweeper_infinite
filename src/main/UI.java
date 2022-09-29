@@ -18,6 +18,9 @@ public class UI {
   final Font font;
   final Font titleFont;
   final HashMap<Integer, Color> numColors = new HashMap<>();
+  final Color overlayColor = new Color(0, 0, 0, 63);
+
+  private boolean isFullscreen;
 
   public UI(GamePanel gp) {
     this.gp = gp;
@@ -47,23 +50,8 @@ public class UI {
     numColors.put(6, new Color(0, 127, 127));
     numColors.put(7, new Color(0, 0, 0));
     numColors.put(8, new Color(127, 127, 127));
-  }
 
-  /**
-   * Takes a graphics object and draws a horizontally centered string at a specified y-position
-   *
-   * @param g2  The graphics object to draw the string on
-   * @param str The string to draw
-   * @param y   The y-coordinate for the string's baseline
-   * @see #getCenterX(int)
-   * @see Graphics2D#drawString(String, int, int)
-   */
-  public void drawStringCentered(@NotNull Graphics2D g2, String str, int y) {
-    g2.drawString(str, (gp.screenWidth - g2.getFontMetrics().stringWidth(str)) / 2, y);
-  }
-
-  public void drawStringRightAligned(@NotNull Graphics2D g2, String str, int rightX, int y) {
-    g2.drawString(str, rightX - g2.getFontMetrics().stringWidth(str), y);
+    isFullscreen = (boolean) gp.settings.get("fullscreen");
   }
 
   /**
@@ -192,5 +180,28 @@ public class UI {
       throw new RuntimeException("UI.makeSlider: Expected defaultValue between 0 and 1 (Got \"" + defaultValue + "\")");
     }
     return new Slider(x, y, width, height, defaultValue, gp.uiScale);
+  }
+
+  /**
+   * Takes a graphics object and draws a horizontally centered string at a specified y-position
+   *
+   * @param g2  The graphics object to draw the string on
+   * @param str The string to draw
+   * @param y   The y-coordinate for the string's baseline
+   * @see #getCenterX(int)
+   * @see Graphics2D#drawString(String, int, int)
+   */
+  public void drawStringCentered(@NotNull Graphics2D g2, String str, int y) {
+    g2.drawString(str, (gp.screenWidth - g2.getFontMetrics().stringWidth(str)) / 2, y);
+  }
+
+  public void drawStringRightAligned(@NotNull Graphics2D g2, String str, int rightX, int y) {
+    g2.drawString(str, rightX - g2.getFontMetrics().stringWidth(str), y);
+  }
+
+  public void setFullscreen(boolean makeFullscreen) {
+    if (isFullscreen != makeFullscreen) {
+
+    }
   }
 }

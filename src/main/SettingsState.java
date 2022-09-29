@@ -10,6 +10,8 @@ public class SettingsState implements State {
   final GamePanel gp;
   final MenuWindow menuWindow;
   final Slider mineChanceSlider;
+
+  private int hoveredIndex;
   private boolean mcSliderDragged = false;
 
   public SettingsState(GamePanel gp) {
@@ -24,7 +26,7 @@ public class SettingsState implements State {
     this.mineChanceSlider = gp.ui.makeSlider(
         menuWindow.lowerRect.x + menuWindow.lowerRect.width
             - (int) Math.round(45 * gp.uiScale) - sliderWidth,
-        menuWindow.lowerRect.y + gp.ui.margin,
+        menuWindow.lowerRect.y + gp.ui.margin * 2 + gp.ui.fontSize,
         sliderWidth, gp.ui.fontSize,
         0.0
     );
@@ -58,18 +60,24 @@ public class SettingsState implements State {
     gp.ui.drawStringCentered(g2, "Settings", menuWindow.upperRect.y + gp.ui.margin + gp.ui.titleFontSize);
     g2.setFont(gp.ui.font);
 
-    String[] drawStrArr = {"Mine Chance"};
+    String[] drawStrArr = {"Fullscreen", "Mine Chance", "", "Go back", "Save", "Save & go back"};
     for (int i = 0; i < drawStrArr.length; i++) {
+      int textY = menuWindow.lowerRect.y + (i + 1) * (gp.ui.margin + gp.ui.fontSize);
+      if (!drawStrArr[i].equals("") && i == hoveredIndex && menuWindow.lowerRect.contains(gp.mouseMotionH.mousePos)) {
+        g2.setColor(gp.ui.overlayColor);
+        g2.fillRect(
+            menuWindow.lowerRect.x, textY - gp.ui.fontSize - gp.ui.margin / 2,
+            menuWindow.lowerRect.width, gp.ui.fontSize + gp.ui.margin
+        );
+      }
       g2.setColor(gp.ui.numColors.get(i + 1));
-      g2.drawString(drawStrArr[i], menuWindow.lowerRect.x + gp.ui.margin,
-          menuWindow.lowerRect.y + (i + 1) * (gp.ui.margin + gp.ui.fontSize)
-      );
+      g2.drawString(drawStrArr[i], menuWindow.lowerRect.x + gp.ui.margin, textY);
     }
-    g2.setColor(gp.ui.numColors.get(1));
+    g2.setColor(gp.ui.numColors.get(2));
     mineChanceSlider.draw(g2);
     gp.ui.drawStringRightAligned(g2, Math.round(mineChanceSlider.getValue() * 100) + "%",
         menuWindow.lowerRect.x + menuWindow.lowerRect.width - gp.ui.margin,
-        menuWindow.lowerRect.y + gp.ui.margin + gp.ui.fontSize
+        menuWindow.lowerRect.y + (gp.ui.margin + gp.ui.fontSize) * 2
     );
   }
 
@@ -132,6 +140,10 @@ public class SettingsState implements State {
 
   @Override
   public void mouseMoved(MouseEvent e) {
-
+    boolean hoveringLowerMenu = menuWindow.lowerRect.contains(e.getPoint());
+    if (hoveringLowerMenu) {
+      hoveredIndex = Math.floorDiv((e.getY() - menuWindow.lowerRect.y - gp.ui.margin / 2),
+          (gp.ui.margin + gp.ui.fontSize));
+    }
   }
 }

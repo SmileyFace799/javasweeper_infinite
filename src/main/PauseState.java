@@ -60,15 +60,16 @@ public class PauseState implements State {
 
     String[] drawStrArr = {"Resume", "Load Game", "Save Game", "Settings", "Quit Game"};
     for (int i = 0; i < drawStrArr.length; i++) {
-      if (i == hoveredIndex) {
-        g2.setColor(Color.black);
-      } else {
-        g2.setColor(gp.ui.numColors.get(i + 1));
+      int textY = menuWindow.lowerRect.y + (i + 1) * (gp.ui.margin + gp.ui.fontSize);
+      if (i == hoveredIndex && menuWindow.lowerRect.contains(gp.mouseMotionH.mousePos)) {
+        g2.setColor(gp.ui.overlayColor);
+        g2.fillRect(
+            menuWindow.lowerRect.x, textY - gp.ui.fontSize - gp.ui.margin / 2,
+            menuWindow.lowerRect.width, gp.ui.fontSize + gp.ui.margin
+        );
       }
-      gp.ui.drawStringCentered(
-          g2, drawStrArr[i],
-          menuWindow.lowerRect.y + (i + 1) * (gp.ui.margin + gp.ui.fontSize)
-      );
+      g2.setColor(gp.ui.numColors.get(i + 1));
+      gp.ui.drawStringCentered(g2, drawStrArr[i], textY);
     }
   }
 

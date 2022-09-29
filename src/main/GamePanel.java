@@ -18,6 +18,7 @@ public class GamePanel extends JPanel implements Runnable {
   final int STATE_SETTINGS = 3;
 
   private Thread gameThread;
+  final JsonMap<Object> settings;
   final MouseHandler mouseH;
   final MouseMotionHandler mouseMotionH;
   final KeyHandler keyH;
@@ -48,7 +49,7 @@ public class GamePanel extends JPanel implements Runnable {
   public GamePanel(JFrame window) {
     this.window = window;
 
-    JsonMap<Object> settings = new JsonMap<>("res/settings.json");
+    settings = new JsonMap<>("res/settings.json");
     screenWidth = (int) settings.get("screenWidth");
     screenHeight = (int) settings.get("screenHeight");
     boardScale = (double) settings.get("boardScale");

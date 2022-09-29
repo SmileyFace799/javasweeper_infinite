@@ -6,6 +6,7 @@ import java.awt.event.MouseMotionListener;
 
 public class MouseMotionHandler implements MouseMotionListener {
   final GamePanel gp;
+  final Point mousePos = new Point(0, 0);
 
   //Constructor
   public MouseMotionHandler(GamePanel gp) {
@@ -19,6 +20,7 @@ public class MouseMotionHandler implements MouseMotionListener {
 
   @Override
   public void mouseMoved(MouseEvent e) {
+    mousePos.setLocation(e.getX(), e.getY());
     gp.stateH.getActive().mouseMoved(e);
   }
 }
