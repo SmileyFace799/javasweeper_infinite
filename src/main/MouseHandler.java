@@ -3,20 +3,26 @@ package main;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
-public class MouseHandler implements MouseListener {
-  final String[] mouseButtons = {"lmb", "rmb", "wheel"};
-  final HashMap<String, Boolean> clicked = new HashMap<>();
-  final HashMap<String, Boolean> pressed = new HashMap<>();
-  final HashMap<String, Long> pressTime = new HashMap<>();
-  final HashMap<String, Point> pressPos = new HashMap<>();
-  final GamePanel gp;
+public class MouseHandler implements MouseListener, Serializable {
+  public static final int LMB = MouseEvent.BUTTON1;
+  public static final int WHEEL = MouseEvent.BUTTON2;
+  public static final int RMB = MouseEvent.BUTTON3;
+
+  final int[] mouseButtons = {LMB, WHEEL, RMB};
+  public final transient Map<Integer, Boolean> clicked = new HashMap<>();
+  public final transient Map<Integer, Boolean> pressed = new HashMap<>();
+  public final transient Map<Integer, Long> pressTime = new HashMap<>();
+  public final transient Map<Integer, Point> pressPos = new HashMap<>();
+  public final GamePanel gp;
 
   //Constructor
   public MouseHandler(GamePanel gp) {
     this.gp = gp;
-    for (String button : mouseButtons) {
+    for (int button : mouseButtons) {
       clicked.put(button, false);
       pressed.put(button, false);
     }
@@ -24,8 +30,8 @@ public class MouseHandler implements MouseListener {
 
   //mutators
   public void frameUpdated() {
-    for (String button : mouseButtons) {
-      if (clicked.get(button)) {
+    for (int button : mouseButtons) {
+      if (Boolean.TRUE.equals(clicked.get(button))) {
         clicked.put(button, false);
       }
     }
@@ -35,10 +41,11 @@ public class MouseHandler implements MouseListener {
   public void mouseClicked(MouseEvent e) {
     int button = e.getButton();
     switch (button) {
-      case MouseEvent.BUTTON1 -> clicked.put("lmb", true);
-      case MouseEvent.BUTTON2 -> clicked.put("wheel", true);
-      case MouseEvent.BUTTON3 -> clicked.put("rmb", true);
+      case MouseEvent.BUTTON1 -> clicked.put(LMB, true);
+      case MouseEvent.BUTTON2 -> clicked.put(WHEEL, true);
+      case MouseEvent.BUTTON3 -> clicked.put(RMB, true);
       default -> {
+        //If no mouse button is clicked, do nothing
       }
     }
     gp.stateH.getActive().mouseClicked(e);
@@ -49,23 +56,24 @@ public class MouseHandler implements MouseListener {
     int button = e.getButton();
     switch (button) {
       case MouseEvent.BUTTON1 -> {
-        pressed.put("lmb", true);
-        pressTime.put("lmb", System.nanoTime());
-        pressPos.put("lmb", e.getPoint());
+        pressed.put(LMB, true);
+        pressTime.put(LMB, System.nanoTime());
+        pressPos.put(LMB, e.getPoint());
       }
       case MouseEvent.BUTTON2 -> {
-        pressed.put("wheel", true);
-        pressTime.put("wheel", System.nanoTime());
-        pressPos.put("wheel", e.getPoint());
+        pressed.put(WHEEL, true);
+        pressTime.put(WHEEL, System.nanoTime());
+        pressPos.put(WHEEL, e.getPoint());
 
         gp.setStartDragCamera(new Point(gp.getCameraOffset()));
       }
       case MouseEvent.BUTTON3 -> {
-        pressed.put("rmb", true);
-        pressTime.put("rmb", System.nanoTime());
-        pressPos.put("rmb", e.getPoint());
+        pressed.put(RMB, true);
+        pressTime.put(RMB, System.nanoTime());
+        pressPos.put(RMB, e.getPoint());
       }
       default -> {
+        //If no mouse button is pressed, do nothing
       }
     }
     gp.stateH.getActive().mousePressed(e);
@@ -76,24 +84,25 @@ public class MouseHandler implements MouseListener {
     int button = e.getButton();
     switch (button) {
       case MouseEvent.BUTTON1 -> {
-        pressed.put("lmb", false);
-        if (System.nanoTime() < pressTime.get("lmb") + (long) (0.1 * 1e9)) {
-          clicked.put("lmb", true);
+        pressed.put(LMB, false);
+        if (System.nanoTime() < pressTime.get(LMB) + (long) (0.1 * 1e9)) {
+          clicked.put(LMB, true);
         }
       }
       case MouseEvent.BUTTON2 -> {
-        pressed.put("wheel", false);
-        if (System.nanoTime() < pressTime.get("wheel") + (long) (0.2 * 1e9)) {
-          clicked.put("wheel", true);
+        pressed.put(WHEEL, false);
+        if (System.nanoTime() < pressTime.get(WHEEL) + (long) (0.2 * 1e9)) {
+          clicked.put(WHEEL, true);
         }
       }
       case MouseEvent.BUTTON3 -> {
-        pressed.put("rmb", false);
-        if (System.nanoTime() < pressTime.get("rmb") + (long) (0.15 * 1e9)) {
-          clicked.put("rmb", true);
+        pressed.put(RMB, false);
+        if (System.nanoTime() < pressTime.get(RMB) + (long) (0.15 * 1e9)) {
+          clicked.put(RMB, true);
         }
       }
       default -> {
+        //If no mouse button is released, do nothing
       }
     }
     gp.stateH.getActive().mouseReleased(e);

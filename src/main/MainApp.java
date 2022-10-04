@@ -1,11 +1,11 @@
 package main;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 
 public class MainApp {
   public static void main(String[] args) {
     JFrame window = new JFrame();
-    window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     window.setResizable(false);
     window.setTitle("Javasweeper Infinite");
 

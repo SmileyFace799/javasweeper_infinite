@@ -2,8 +2,9 @@ package main;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.Serializable;
 
-public class KeyHandler implements KeyListener {
+public class KeyHandler implements KeyListener, Serializable {
   private boolean escPressed = false;
   private boolean escTapped = false;
   final GamePanel gp;
@@ -32,6 +33,7 @@ public class KeyHandler implements KeyListener {
   //other
   @Override
   public void keyTyped(KeyEvent e) {
+    //Typing is never used
   }
 
   @Override
@@ -44,6 +46,7 @@ public class KeyHandler implements KeyListener {
       }
       case KeyEvent.VK_F3 -> gp.toggleDebug();
       default -> {
+        //If nothing is pressed, don't do anything
       }
     }
   }

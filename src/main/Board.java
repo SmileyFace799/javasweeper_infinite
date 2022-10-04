@@ -169,8 +169,9 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
         BufferedImage.TYPE_INT_ARGB
     );
     Graphics2D g2 = image.createGraphics();
-    for (int x : this.keySet()) {
-      for (int y : this.get(x).keySet()) {
+    for (Entry<Integer, HashMap<Integer, Square>> column : this.entrySet()) {
+      int x = column.getKey();
+      for (int y : column.getValue().keySet()) {
         if (x < minX || x > maxX || y < minY || y > maxY) {
           System.out.println(
               "x=" + x + " & y=" + y + ": Square is out of bounds"

@@ -10,24 +10,24 @@ public class GamePanel extends JPanel implements Runnable {
 
   //CONSTANTS
   final JFrame window;
-  final int originalTileSize = 16;
+  static final int ORIGINAL_TILE_SIZE = 16;
 
-  final int STATE_GAME = 0;
-  final int STATE_GAMEOVER = 1;
-  final int STATE_PAUSED = 2;
-  final int STATE_SETTINGS = 3;
+  static final int STATE_GAME = 0;
+  static final int STATE_GAME_OVER = 1;
+  static final int STATE_PAUSED = 2;
+  static final int STATE_SETTINGS = 3;
 
-  private Thread gameThread;
-  final JsonMap<Object> settings;
-  final MouseHandler mouseH;
-  final MouseMotionHandler mouseMotionH;
-  final KeyHandler keyH;
-  final StateHandler stateH;
-  final UI ui;
+  private transient Thread gameThread;
+  final transient MouseHandler mouseH;
+  final transient MouseMotionHandler mouseMotionH;
+  final transient KeyHandler keyH;
+  final transient StateHandler stateH;
+  final transient UI ui;
 
   final TxMap txMap = new TxMap("imgs");
 
   //SETTINGS (configurable)
+  final JsonMap<Object> settings;
   final int screenWidth;
   final int screenHeight;
   final double boardScale;
@@ -42,7 +42,7 @@ public class GamePanel extends JPanel implements Runnable {
   final Board board;
   private Point cameraOffset;
   private Point startDragCamera;
-  final HashMap<String, Point> clickedBoardPoints = new HashMap<>();
+  final HashMap<Integer, Point> clickedBoardPoints = new HashMap<>();
   private boolean debugEnabled = false;
 
   //Constructor
@@ -53,7 +53,7 @@ public class GamePanel extends JPanel implements Runnable {
     screenWidth = (int) settings.get("screenWidth");
     screenHeight = (int) settings.get("screenHeight");
     boardScale = (double) settings.get("boardScale");
-    tileSize = (int) Math.round(originalTileSize * boardScale);
+    tileSize = (int) Math.round(ORIGINAL_TILE_SIZE * boardScale);
     mineChance = ((double) settings.get("mineChance")) / 100;
     uiScale = (double) settings.get("UIScale");
     cameraOffset = new Point(-(screenWidth - tileSize) / 2, -(screenHeight - tileSize) / 2);
@@ -85,7 +85,7 @@ public class GamePanel extends JPanel implements Runnable {
       ((NumberSquare) board.get(0, 0)).reveal(0);
     }
 
-    for (String button : mouseH.mouseButtons) {
+    for (int button : mouseH.mouseButtons) {
       clickedBoardPoints.put(button, new Point());
     }
   }
@@ -146,6 +146,7 @@ public class GamePanel extends JPanel implements Runnable {
     keyH.frameUpdated();
   }
 
+  @Override
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
 

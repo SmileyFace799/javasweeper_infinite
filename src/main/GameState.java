@@ -7,7 +7,6 @@ import squares.Square;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.util.Arrays;
 
 /**
  * Represents a state where the game is being played
@@ -28,8 +27,8 @@ public class GameState implements State {
 
   @Override
   public void update() {
-    for (String button : gp.mouseH.mouseButtons) {
-      if (gp.mouseH.clicked.get(button)) {
+    for (int button : gp.mouseH.mouseButtons) {
+      if (Boolean.TRUE.equals(gp.mouseH.clicked.get(button))) {
         Point pressPos = gp.mouseH.pressPos.get(button);
         Point camOffset = gp.getCameraOffset();
         gp.clickedBoardPoints.get(button).setLocation(
@@ -39,19 +38,19 @@ public class GameState implements State {
       }
     }
 
-    if (gp.mouseH.clicked.get("lmb")) {
-      if (!gp.board.exists(gp.clickedBoardPoints.get("lmb"))) {
-        gp.board.generate(gp.clickedBoardPoints.get("lmb"));
+    if (Boolean.TRUE.equals(gp.mouseH.clicked.get(MouseHandler.LMB))) {
+      if (!gp.board.exists(gp.clickedBoardPoints.get(MouseHandler.LMB))) {
+        gp.board.generate(gp.clickedBoardPoints.get(MouseHandler.LMB));
       }
-      gp.board.get(gp.clickedBoardPoints.get("lmb")).reveal();
+      gp.board.get(gp.clickedBoardPoints.get(MouseHandler.LMB)).reveal();
     }
-    if (gp.mouseH.clicked.get("rmb") && gp.board.exists(gp.clickedBoardPoints.get("rmb"))) {
-      Square clickedSquare = gp.board.get(gp.clickedBoardPoints.get("rmb"));
+    if (Boolean.TRUE.equals(gp.mouseH.clicked.get(MouseHandler.RMB)) && gp.board.exists(gp.clickedBoardPoints.get(MouseHandler.RMB))) {
+      Square clickedSquare = gp.board.get(gp.clickedBoardPoints.get(MouseHandler.RMB));
       if (!clickedSquare.isRevealed()) {
         clickedSquare.flag();
       }
-    } else if (gp.mouseH.clicked.get("wheel")) {
-      Point pos = gp.clickedBoardPoints.get("wheel"); //pos: Location clicked by the mouse-wheel
+    } else if (Boolean.TRUE.equals(gp.mouseH.clicked.get(MouseHandler.WHEEL))) {
+      Point pos = gp.clickedBoardPoints.get(MouseHandler.WHEEL); //pos: Location clicked by the mouse-wheel
       Square clickedSquare = gp.board.get(pos);
       if (
           gp.board.exists(pos)
@@ -78,14 +77,14 @@ public class GameState implements State {
         }
       }
     }
-    for (String button : gp.mouseH.mouseButtons) {
-      if (gp.mouseH.clicked.get(button)) {
+    for (int button : gp.mouseH.mouseButtons) {
+      if (Boolean.TRUE.equals(gp.mouseH.clicked.get(button))) {
         gp.board.save();
       }
     }
 
     if (gp.keyH.getEscTapped()) {
-      gp.stateH.setActive(gp.STATE_PAUSED);
+      gp.stateH.setActive(GamePanel.STATE_PAUSED);
     }
   }
 
@@ -126,28 +125,7 @@ public class GameState implements State {
 
   @Override
   public void mousePressed(MouseEvent e) {
-    int button = e.getButton();
-    switch (button) {
-      case MouseEvent.BUTTON1 -> {
-        gp.mouseH.pressed.put("lmb", true);
-        gp.mouseH.pressTime.put("lmb", System.nanoTime());
-        gp.mouseH.pressPos.put("lmb", e.getPoint());
-      }
-      case MouseEvent.BUTTON2 -> {
-        gp.mouseH.pressed.put("wheel", true);
-        gp.mouseH.pressTime.put("wheel", System.nanoTime());
-        gp.mouseH.pressPos.put("wheel", e.getPoint());
 
-        gp.setStartDragCamera(new Point(gp.getCameraOffset()));
-      }
-      case MouseEvent.BUTTON3 -> {
-        gp.mouseH.pressed.put("rmb", true);
-        gp.mouseH.pressTime.put("rmb", System.nanoTime());
-        gp.mouseH.pressPos.put("rmb", e.getPoint());
-      }
-      default -> {
-      }
-    }
   }
 
   @Override
@@ -167,11 +145,11 @@ public class GameState implements State {
 
   @Override
   public void mouseDragged(MouseEvent e) {
-    if (gp.mouseH.pressed.get("wheel")
-        && System.nanoTime() > gp.mouseH.pressTime.get("wheel") + (long) (0.15 * 1e9)
+    if (Boolean.TRUE.equals(gp.mouseH.pressed.get(MouseHandler.WHEEL))
+        && System.nanoTime() > gp.mouseH.pressTime.get(MouseHandler.WHEEL) + (long) (0.15 * 1e9)
     ) {
       Point cameraOffset = new Point(gp.getStartDragCamera());
-      Point startDragPos = gp.mouseH.pressPos.get("wheel");
+      Point startDragPos = gp.mouseH.pressPos.get(MouseHandler.WHEEL);
       Point pos = e.getPoint();
       cameraOffset.x += startDragPos.x - pos.x;
       cameraOffset.y += startDragPos.y - pos.y;

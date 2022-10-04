@@ -11,7 +11,7 @@ import java.util.Objects;
 public class UI {
   final GamePanel gp;
   final int margin;
-  final int defaultFontSize = 16;
+  static final int DEFAULT_FONT_SIZE = 16;
   final Font defaultFont;
   final int fontSize;
   final int titleFontSize;
@@ -25,7 +25,7 @@ public class UI {
   public UI(GamePanel gp) {
     this.gp = gp;
     this.margin = (int) Math.round(gp.uiScale * 3);
-    this.defaultFont = new Font("Arial", Font.PLAIN, defaultFontSize);
+    this.defaultFont = new Font("Arial", Font.PLAIN, DEFAULT_FONT_SIZE);
     this.fontSize = (int) Math.round(gp.uiScale * 8);
     this.titleFontSize = (int) Math.round(gp.uiScale * 12);
 
