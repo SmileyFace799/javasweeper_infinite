@@ -40,6 +40,7 @@ public class TxMap extends HashMap<String, BufferedImage> {
     BufferedImage scaledImage = new BufferedImage(width, height, image.getType());
     Graphics2D g2 = scaledImage.createGraphics();
     g2.drawImage(image, 0, 0, width, height, null);
+    g2.dispose();
     return scaledImage;
   }
 
@@ -83,6 +84,24 @@ public class TxMap extends HashMap<String, BufferedImage> {
           );
         }
       }
+    }
+  }
+
+  public void scale(String name, int size) {
+    scale(name, size, size);
+  }
+
+  public void scale(String name, int width, int height) {
+    this.put(name, getScaled(width, height, name));
+  }
+
+  public void scaleAll(int size) {
+    scaleAll(size, size);
+  }
+
+  public void scaleAll(int width, int height) {
+    for (Entry<String, BufferedImage> imgEntry : this.entrySet()) {
+      this.put(imgEntry.getKey(), getScaled(width, height, imgEntry.getValue()));
     }
   }
 }

@@ -27,7 +27,7 @@ public class GamePanel extends JPanel implements Runnable {
   final TxMap txMap = new TxMap("imgs");
 
   //SETTINGS (configurable)
-  final JsonMap<Object> settings;
+  final transient JsonMap<Object> settings;
   final int screenWidth;
   final int screenHeight;
   final double boardScale;

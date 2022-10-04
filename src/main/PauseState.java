@@ -33,7 +33,7 @@ public class PauseState implements State {
     if (gp.keyH.getEscTapped()) {
       gp.stateH.setActive(gp.STATE_GAME);
     }
-    if (gp.mouseH.clicked.get("lmb") && hoveringLowerMenu) {
+    if (gp.mouseH.clicked.get(MouseHandler.LMB) && hoveringLowerMenu) {
       switch (hoveredIndex) {
         case 0 -> gp.stateH.setActive(gp.STATE_GAME);
         case 3 -> gp.stateH.setActive(gp.STATE_SETTINGS);

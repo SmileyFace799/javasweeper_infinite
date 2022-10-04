@@ -193,6 +193,7 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
       image = new BufferedImage(tileSize, tileSize, BufferedImage.TYPE_INT_ARGB);
       Graphics2D g2 = image.createGraphics();
       g2.drawImage(square.getTx(), 0, 0, tileSize, tileSize, null);
+      g2.dispose();
       return;
     }
     if (x < minX) {
