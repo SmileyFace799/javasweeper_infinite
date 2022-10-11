@@ -7,20 +7,24 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 public class PauseState implements State {
-  final GamePanel gp;
-  final MenuWindow menuWindow;
+  private final GamePanel gp;
+  private final Settings settings;
 
+  private final MenuWindow menuWindow;
   private boolean hoveringLowerMenu;
   private int hoveredIndex;
 
   public PauseState(GamePanel gp) {
     this.gp = gp;
-    this.menuWindow = gp.ui.makeSubWindow(
-        (int) Math.round(150 * gp.uiScale),
-        gp.ui.titleFontSize + 2 * gp.ui.margin,
-        (int) Math.round(100 * gp.uiScale)
+    this.settings = gp.settings;
+
+    double uiScale = settings.getUiScale();
+    this.menuWindow = gp.uiH.makeSubWindow(
+        (int) Math.round(150 * uiScale),
+        gp.uiH.titleFontSize + 2 * gp.uiH.margin,
+        (int) Math.round(100 * uiScale)
     );
-    gp.ui.centerSubWindow(menuWindow);
+    gp.uiH.centerSubWindow(menuWindow);
   }
 
   @Override
@@ -54,22 +58,22 @@ public class PauseState implements State {
     gp.stateH.getState(gp.STATE_GAME).drawScreen(g2);
     menuWindow.draw(g2);
 
-    g2.setFont(gp.ui.titleFont);
-    gp.ui.drawStringCentered(g2, "Game Paused", menuWindow.upperRect.y + gp.ui.margin + gp.ui.titleFontSize);
-    g2.setFont(gp.ui.font);
+    g2.setFont(gp.uiH.titleFont);
+    gp.uiH.drawStringCentered(g2, "Game Paused", menuWindow.upperRect.y + gp.uiH.margin + gp.uiH.titleFontSize);
+    g2.setFont(gp.uiH.font);
 
     String[] drawStrArr = {"Resume", "Load Game", "Save Game", "Settings", "Quit Game"};
     for (int i = 0; i < drawStrArr.length; i++) {
-      int textY = menuWindow.lowerRect.y + (i + 1) * (gp.ui.margin + gp.ui.fontSize);
+      int textY = menuWindow.lowerRect.y + (i + 1) * (gp.uiH.margin + gp.uiH.fontSize);
       if (i == hoveredIndex && menuWindow.lowerRect.contains(gp.mouseMotionH.mousePos)) {
-        g2.setColor(gp.ui.overlayColor);
+        g2.setColor(gp.uiH.overlayColor);
         g2.fillRect(
-            menuWindow.lowerRect.x, textY - gp.ui.fontSize - gp.ui.margin / 2,
-            menuWindow.lowerRect.width, gp.ui.fontSize + gp.ui.margin
+            menuWindow.lowerRect.x, textY - gp.uiH.fontSize - gp.uiH.margin / 2,
+            menuWindow.lowerRect.width, gp.uiH.fontSize + gp.uiH.margin
         );
       }
-      g2.setColor(gp.ui.numColors.get(i + 1));
-      gp.ui.drawStringCentered(g2, drawStrArr[i], textY);
+      g2.setColor(gp.uiH.numColors.get(i + 1));
+      gp.uiH.drawStringCentered(g2, drawStrArr[i], textY);
     }
   }
 
@@ -122,8 +126,8 @@ public class PauseState implements State {
   public void mouseMoved(MouseEvent e) {
     hoveringLowerMenu = menuWindow.lowerRect.contains(e.getPoint());
     if (hoveringLowerMenu) {
-      hoveredIndex = Math.floorDiv((e.getY() - menuWindow.lowerRect.y - gp.ui.margin / 2),
-          (gp.ui.margin + gp.ui.fontSize));
+      hoveredIndex = Math.floorDiv((e.getY() - menuWindow.lowerRect.y - gp.uiH.margin / 2),
+          (gp.uiH.margin + gp.uiH.fontSize));
     }
   }
 }

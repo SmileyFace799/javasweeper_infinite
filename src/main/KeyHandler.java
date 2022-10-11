@@ -1,5 +1,7 @@
 package main;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.Serializable;
@@ -7,7 +9,7 @@ import java.io.Serializable;
 public class KeyHandler implements KeyListener, Serializable {
   private boolean escPressed = false;
   private boolean escTapped = false;
-  final GamePanel gp;
+  private final GamePanel gp;
 
   //Constructor
   public KeyHandler(GamePanel gp) {
@@ -32,12 +34,12 @@ public class KeyHandler implements KeyListener, Serializable {
 
   //other
   @Override
-  public void keyTyped(KeyEvent e) {
-    //Typing is never used
+  public void keyTyped(@NotNull KeyEvent e) {
+    gp.stateH.getActive().keyTyped(e);
   }
 
   @Override
-  public void keyPressed(KeyEvent e) {
+  public void keyPressed(@NotNull KeyEvent e) {
     int code = e.getKeyCode();
     switch (code) {
       case KeyEvent.VK_ESCAPE -> {
@@ -49,13 +51,19 @@ public class KeyHandler implements KeyListener, Serializable {
         //If nothing is pressed, don't do anything
       }
     }
+    gp.stateH.getActive().keyPressed(e);
   }
 
   @Override
-  public void keyReleased(KeyEvent e) {
+  public void keyReleased(@NotNull KeyEvent e) {
     int code = e.getKeyCode();
-    if (code == KeyEvent.VK_ESCAPE) {
-      escPressed = false;
+    switch (code) {
+      case (KeyEvent.VK_ESCAPE) -> escPressed = false;
+      case (KeyEvent.VK_F11) -> gp.uiH.toggleFullscreen();
+      default -> {
+        //If nothing is released, don't do anything
+      }
     }
+    gp.stateH.getActive().keyReleased(e);
   }
 }

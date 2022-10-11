@@ -58,19 +58,19 @@ public class MouseHandler implements MouseListener, Serializable {
       case MouseEvent.BUTTON1 -> {
         pressed.put(LMB, true);
         pressTime.put(LMB, System.nanoTime());
-        pressPos.put(LMB, e.getPoint());
+        pressPos.put(LMB, gp.uiH.scalePointToDisplay(e.getPoint()));
       }
       case MouseEvent.BUTTON2 -> {
         pressed.put(WHEEL, true);
         pressTime.put(WHEEL, System.nanoTime());
-        pressPos.put(WHEEL, e.getPoint());
+        pressPos.put(WHEEL, gp.uiH.scalePointToDisplay(e.getPoint()));
 
         gp.setStartDragCamera(new Point(gp.getCameraOffset()));
       }
       case MouseEvent.BUTTON3 -> {
         pressed.put(RMB, true);
         pressTime.put(RMB, System.nanoTime());
-        pressPos.put(RMB, e.getPoint());
+        pressPos.put(RMB, gp.uiH.scalePointToDisplay(e.getPoint()));
       }
       default -> {
         //If no mouse button is pressed, do nothing

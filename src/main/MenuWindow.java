@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 /**
  * Represents a menu window with two areas, one upper and lower area, and border
  *
- * @see UI#makeSubWindow(int, int, int, int, int)
+ * @see UIHandler#makeSubWindow(int, int, int, int, int)
  */
 public class MenuWindow {
   final BufferedImage img;

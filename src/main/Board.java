@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import squares.BombSquare;
@@ -31,13 +32,13 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
   public Board(GamePanel gp) { //Defaults to 0 mineChance
     this.mineChance = 0;
     this.gp = gp;
-    this.tileSize = gp.tileSize;
+    this.tileSize = gp.getTileSize();
   }
 
   public Board(double mineChance, GamePanel gp) {
     this.mineChance = mineChance;
     this.gp = gp;
-    this.tileSize = gp.tileSize;
+    this.tileSize = gp.getTileSize();
   }
 
   //Accessors
@@ -132,8 +133,9 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
 
   private void massReveal(Board revealBoard, int recursionCount) {
     Board nextRevealBoard = new Board(gp);
-    for (int x : revealBoard.keySet()) {
-      for (int y : revealBoard.get(x).keySet()) {
+    for (Map.Entry<Integer, HashMap<Integer, Square>> entryX : revealBoard.entrySet()) {
+      int x = entryX.getKey();
+      for (int y : entryX.getValue().keySet()) {
         NumberSquare revealSquare = (NumberSquare) get(x, y);
         revealSquare.reveal(mineChance, false);
         if (revealSquare.getNumber() == 0 && recursionCount > 0) {
@@ -163,10 +165,9 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
    * Squares outside minX, minY, maxX & maxY will be out of bounds & not drawn
    */
   public void drawInitialImage() {
-    image = new BufferedImage(
+    image = gp.uiH.makeFormattedImage(
         (1 + (maxX - minX)) * tileSize,
-        (1 + (maxY - minY)) * tileSize,
-        BufferedImage.TYPE_INT_ARGB
+        (1 + (maxY - minY)) * tileSize
     );
     Graphics2D g2 = image.createGraphics();
     for (Entry<Integer, HashMap<Integer, Square>> column : this.entrySet()) {
@@ -190,15 +191,15 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
     if (this.image == null) {
       minX = x;
       minY = y;
-      image = new BufferedImage(tileSize, tileSize, BufferedImage.TYPE_INT_ARGB);
+      image = gp.uiH.makeFormattedImage(tileSize, tileSize);
       Graphics2D g2 = image.createGraphics();
-      g2.drawImage(square.getTx(), 0, 0, tileSize, tileSize, null);
+      g2.drawImage(square.getTx(), 0, 0, null);
       g2.dispose();
       return;
     }
     if (x < minX) {
-      BufferedImage newImage = new BufferedImage(
-          image.getWidth() + ((minX - x) * tileSize), image.getHeight(), image.getType()
+      BufferedImage newImage = gp.uiH.makeFormattedImage(
+          image.getWidth() + ((minX - x) * tileSize), image.getHeight()
       );
       Graphics2D newG2 = newImage.createGraphics();
       newG2.drawImage(image, (minX - x) * tileSize, 0, null);
@@ -206,8 +207,8 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
       image = newImage;
       minX = x;
     } else if (x > maxX) {
-      BufferedImage newImage = new BufferedImage(
-          image.getWidth() + ((x - maxX) * tileSize), image.getHeight(), image.getType()
+      BufferedImage newImage = gp.uiH.makeFormattedImage(
+          image.getWidth() + ((x - maxX) * tileSize), image.getHeight()
       );
       Graphics2D newG2 = newImage.createGraphics();
       newG2.drawImage(image, 0, 0, null);
@@ -216,8 +217,8 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
       maxX = x;
     }
     if (y < minY) {
-      BufferedImage newImage = new BufferedImage(
-          image.getWidth(), image.getHeight() + ((minY - y) * tileSize), image.getType()
+      BufferedImage newImage = gp.uiH.makeFormattedImage(
+          image.getWidth(), image.getHeight() + ((minY - y) * tileSize)
       );
       Graphics2D newG2 = newImage.createGraphics();
       newG2.drawImage(image, 0, (minY - y) * tileSize, null);
@@ -225,8 +226,8 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
       image = newImage;
       minY = y;
     } else if (y > maxY) {
-      BufferedImage newImage = new BufferedImage(
-          image.getWidth(), image.getHeight() + ((y - maxY) * tileSize), image.getType()
+      BufferedImage newImage = gp.uiH.makeFormattedImage(
+          image.getWidth(), image.getHeight() + ((y - maxY) * tileSize)
       );
       Graphics2D newG2 = newImage.createGraphics();
       newG2.drawImage(image, 0, 0, null);
@@ -296,8 +297,7 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
       System.out.println("No filename is associated with this board");
       return;
     }
-    try {
-      BufferedWriter bw = new BufferedWriter(new FileWriter(associatedFilename));
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(associatedFilename))) {
       StringBuilder boardStr = new StringBuilder();
       for (int x : this.keySet()) {
         for (int y : get(x).keySet()) {
@@ -325,7 +325,6 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
       boardStr.deleteCharAt(boardStr.length() - 1);
 
       bw.write(boardStr.toString());
-      bw.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
