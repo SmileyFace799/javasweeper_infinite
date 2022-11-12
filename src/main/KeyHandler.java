@@ -10,6 +10,7 @@ public class KeyHandler implements KeyListener, Serializable {
   private boolean escPressed = false;
   private boolean escTapped = false;
   private final GamePanel gp;
+  private KeyEvent kTyped = null;
 
   //Constructor
   public KeyHandler(GamePanel gp) {
@@ -25,17 +26,20 @@ public class KeyHandler implements KeyListener, Serializable {
     return escTapped;
   }
 
-  //mutators
+  public KeyEvent getKTyped() {
+    return kTyped;
+  }
+
+  //Mutators
   public void frameUpdated() {
     if (escTapped) {
       escTapped = false;
     }
   }
 
-  //other
   @Override
   public void keyTyped(@NotNull KeyEvent e) {
-    gp.stateH.getActive().keyTyped(e);
+    this.kTyped = e;
   }
 
   @Override

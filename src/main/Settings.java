@@ -1,6 +1,8 @@
 package main;
 
-public class Settings {
+import java.io.Serializable;
+
+public class Settings implements Serializable {
   private static final JsonMap<Object> json = new JsonMap<>("res/settings.json");
 
   //Accessors

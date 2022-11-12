@@ -264,11 +264,17 @@ public class UIHandler {
       Rectangle screenBounds = graphicsConfig.getBounds();
       windowWidth = screenBounds.width;
       windowHeight = screenBounds.height;
-      graphicsDevice.setFullScreenWindow(gp.window);
+      if (graphicsDevice.getFullScreenWindow() == null) {
+        gp.setWindowUndecorated(true);
+        graphicsDevice.setFullScreenWindow(gp.getWindow());
+      }
     } else {
       windowWidth = settings.getDisplayWidth();
       windowHeight = settings.getDisplayHeight();
-      graphicsDevice.setFullScreenWindow(null);
+      if (graphicsDevice.getFullScreenWindow() != null) {
+        gp.setWindowUndecorated(false);
+        graphicsDevice.setFullScreenWindow(null);
+      }
     }
   }
 

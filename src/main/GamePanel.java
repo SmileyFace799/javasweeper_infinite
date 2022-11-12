@@ -8,7 +8,7 @@ import squares.NumberSquare;
 public class GamePanel extends JPanel implements Runnable {
 
   //CONSTANTS
-  public final JFrame window;
+  private final JFrame window;
   public static final int FPS = 60;
   public static final int ORIGINAL_TILE_SIZE = 16;
 
@@ -18,7 +18,7 @@ public class GamePanel extends JPanel implements Runnable {
   public static final int STATE_SETTINGS = 3;
 
   private transient Thread gameThread;
-  public final transient Settings settings;
+  public final Settings settings;
   public final transient MouseHandler mouseH;
   public final transient MouseMotionHandler mouseMotionH;
   public final transient KeyHandler keyH;
@@ -45,7 +45,6 @@ public class GamePanel extends JPanel implements Runnable {
 
     cameraOffset = new Point(-(settings.getDisplayWidth() - getTileSize()) / 2, -(settings.getDisplayHeight() - getTileSize()) / 2);
 
-    window.setSize(new Dimension(settings.getDisplayWidth(), settings.getDisplayHeight()));
     this.setPreferredSize(new Dimension(settings.getDisplayWidth(), settings.getDisplayHeight()));
     this.setDoubleBuffered(true);
     this.setFocusable(true);
@@ -70,6 +69,10 @@ public class GamePanel extends JPanel implements Runnable {
   }
 
   //accessors
+  public JFrame getWindow() {
+    return window;
+  }
+
   public int getTileSize() {
     return (int) Math.round(ORIGINAL_TILE_SIZE * settings.getBoardScale());
   }
@@ -87,6 +90,12 @@ public class GamePanel extends JPanel implements Runnable {
   }
 
   //mutators
+  public void setWindowUndecorated(boolean undecorated) {
+    window.dispose();
+    window.setUndecorated(undecorated);
+    window.setVisible(true);
+  }
+
   public void setCameraOffset(Point pos) {
     cameraOffset = pos;
   }
@@ -130,6 +139,8 @@ public class GamePanel extends JPanel implements Runnable {
 
   public void update() {
     stateH.getActive().update();
+
+
     mouseH.frameUpdated();
     keyH.frameUpdated();
   }
