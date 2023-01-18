@@ -5,25 +5,30 @@ import javax.swing.*;
 
 import squares.NumberSquare;
 
-public class GamePanel extends JPanel implements Runnable {
+public class GamePanel implements Runnable {
 
   //CONSTANTS
   private final JFrame window;
   public static final int FPS = 60;
   public static final int ORIGINAL_TILE_SIZE = 16;
 
-  public static final int STATE_GAME = 0;
-  public static final int STATE_GAME_OVER = 1;
-  public static final int STATE_PAUSED = 2;
-  public static final int STATE_SETTINGS = 3;
+  private final JPanel jPanel = new JPanel() {
+    @Override
+    public void paintComponents(Graphics g) {
+      super.paintComponent(g);
 
-  private transient Thread gameThread;
+      Graphics2D g2 = (Graphics2D) g;
+      uiH.drawScreen(g2, debugEnabled);
+      g2.dispose();
+    }
+  };
+  private  Thread gameThread;
   public final Settings settings;
-  public final transient MouseHandler mouseH;
-  public final transient MouseMotionHandler mouseMotionH;
-  public final transient KeyHandler keyH;
-  public final transient StateHandler stateH;
-  public final transient UIHandler uiH;
+  public final  MouseHandler mouseH;
+  public final  MouseMotionHandler mouseMotionH;
+  public final  KeyHandler keyH;
+  public final  StateHandler stateH;
+  public final  UIHandler uiH;
   public final TxMap txMap = new TxMap("imgs");
 
   //VARIABLES
@@ -45,17 +50,17 @@ public class GamePanel extends JPanel implements Runnable {
 
     cameraOffset = new Point(-(settings.getDisplayWidth() - getTileSize()) / 2, -(settings.getDisplayHeight() - getTileSize()) / 2);
 
-    this.setPreferredSize(new Dimension(settings.getDisplayWidth(), settings.getDisplayHeight()));
-    this.setDoubleBuffered(true);
-    this.setFocusable(true);
-    this.setBackground(Color.black);
-    this.addMouseListener(mouseH);
-    this.addMouseMotionListener(mouseMotionH);
-    this.addKeyListener(keyH);
+    jPanel.setPreferredSize(new Dimension(settings.getDisplayWidth(), settings.getDisplayHeight()));
+    jPanel.setDoubleBuffered(true);
+    jPanel.setFocusable(true);
+    jPanel.setBackground(Color.black);
+    jPanel.addMouseListener(mouseH);
+    jPanel.addMouseMotionListener(mouseMotionH);
+    jPanel.addKeyListener(keyH);
 
-    stateH.addState(STATE_GAME, new GameState(this));
-    stateH.addState(STATE_PAUSED, new PauseState(this));
-    stateH.addState(STATE_SETTINGS, new SettingsState(this));
+    stateH.addState(GameState.STATE_GAME, new PlayState(this));
+    stateH.addState(GameState.STATE_PAUSED, new PauseState(this));
+    stateH.addState(GameState.STATE_SETTINGS, new SettingsState(this));
 
     txMap.replaceAll((k, v) -> uiH.convertFormat(v));
 
@@ -71,6 +76,10 @@ public class GamePanel extends JPanel implements Runnable {
   //accessors
   public JFrame getWindow() {
     return window;
+  }
+
+  public JPanel getJPanel() {
+    return jPanel;
   }
 
   public int getTileSize() {
@@ -131,7 +140,7 @@ public class GamePanel extends JPanel implements Runnable {
 
       if (delta >= 1) {
         update();
-        repaint();
+        jPanel.repaint();
         delta--;
       }
     }
@@ -143,14 +152,5 @@ public class GamePanel extends JPanel implements Runnable {
 
     mouseH.frameUpdated();
     keyH.frameUpdated();
-  }
-
-  @Override
-  public void paintComponent(Graphics g) {
-    super.paintComponent(g);
-
-    Graphics2D g2 = (Graphics2D) g;
-    uiH.drawScreen(g2, debugEnabled);
-    g2.dispose();
   }
 }

@@ -16,7 +16,9 @@ import squares.BombSquare;
 import squares.NumberSquare;
 import squares.Square;
 
-public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
+public class Board {
+
+  private final HashMap<Integer, HashMap<Integer, Square>> boardMap = new HashMap<>();
   final double mineChance;
   final GamePanel gp;
   final int tileSize;
@@ -42,6 +44,10 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
   }
 
   //Accessors
+  public Map<Integer, HashMap<Integer, Square>> getBoardMap() {
+    return boardMap;
+  }
+
   public int getMinX() {
     return minX;
   }
@@ -67,7 +73,7 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
   }
 
   public boolean exists(int x, int y) {
-    return this.containsKey(x) && this.get(x).containsKey(y);
+    return boardMap.containsKey(x) && boardMap.get(x).containsKey(y);
   }
 
   public Square get(Point pos) {
@@ -76,7 +82,7 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
 
   public Square get(int x, int y) {
     if (exists(x, y)) {
-      return super.get(x).get(y);
+      return boardMap.get(x).get(y);
     } else {
       System.out.println("get: There is no square at x=" + x + " & y=" + y);
       return null;
@@ -111,11 +117,10 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
   }
 
   public void put(int x, int y, Square square, boolean updateImg) {
-    if (!this.containsKey(x)) {
-      this.put(x, new HashMap<>());
-    }
-    if (!this.get(x).containsKey(y)) {
-      this.get(x).put(y, square);
+    boardMap.computeIfAbsent(x, xVal -> boardMap.put(xVal, new HashMap<>()));
+
+    if (!boardMap.get(x).containsKey(y)) {
+      boardMap.get(x).put(y, square);
     } else {
       System.out.println("put: A square already exists at x=" + x + " & y=" + y);
     }
@@ -126,14 +131,13 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
 
   public void massReveal(int x, int y) {
     Board revealBoard = new Board(gp);
-    revealBoard.put(x, new HashMap<>());
-    revealBoard.get(x).put(y, get(x, y));
+    revealBoard.put(x, y, get(x, y));
     massReveal(revealBoard, 50);
   }
 
   private void massReveal(Board revealBoard, int recursionCount) {
     Board nextRevealBoard = new Board(gp);
-    for (Map.Entry<Integer, HashMap<Integer, Square>> entryX : revealBoard.entrySet()) {
+    for (Map.Entry<Integer, HashMap<Integer, Square>> entryX : revealBoard.getBoardMap().entrySet()) {
       int x = entryX.getKey();
       for (int y : entryX.getValue().keySet()) {
         NumberSquare revealSquare = (NumberSquare) get(x, y);
@@ -170,7 +174,7 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
         (1 + (maxY - minY)) * tileSize
     );
     Graphics2D g2 = image.createGraphics();
-    for (Entry<Integer, HashMap<Integer, Square>> column : this.entrySet()) {
+    for (Map.Entry<Integer, HashMap<Integer, Square>> column : boardMap.entrySet()) {
       int x = column.getKey();
       for (int y : column.getValue().keySet()) {
         if (x < minX || x > maxX || y < minY || y > maxY) {
@@ -264,7 +268,7 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
         if (Boolean.parseBoolean(squareArr[3])) {
           square.flag();
         }
-        if (this.isEmpty()) {
+        if (boardMap.isEmpty()) {
           minX = x;
           minY = y;
           maxX = x;
@@ -299,18 +303,17 @@ public class Board extends HashMap<Integer, HashMap<Integer, Square>> {
     }
     try (BufferedWriter bw = new BufferedWriter(new FileWriter(associatedFilename))) {
       StringBuilder boardStr = new StringBuilder();
-      for (int x : this.keySet()) {
-        for (int y : get(x).keySet()) {
-          Square square = get(x, y);
+      for (HashMap<Integer, Square> xMap : boardMap.values()) {
+        for (Square square : xMap.values()) {
           if (square instanceof NumberSquare) {
             boardStr.append("number");
           } else if (square instanceof BombSquare) {
             boardStr.append("bomb");
           }
           boardStr.append("&");
-          boardStr.append(x);
+          boardStr.append(square.getX());
           boardStr.append("&");
-          boardStr.append(y);
+          boardStr.append(square.getY());
           boardStr.append("&");
           boardStr.append(square.isFlagged());
           if (square instanceof NumberSquare numSquare) {

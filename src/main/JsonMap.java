@@ -9,7 +9,7 @@ import java.util.HashMap;
 import org.codehaus.jackson.map.ObjectMapper;
 
 public class JsonMap<V> extends HashMap<String, V> {
-  final ObjectMapper mapper = new ObjectMapper();
+  final transient ObjectMapper mapper = new ObjectMapper();
   final String fileName;
 
   public JsonMap(String fileName) {
@@ -19,10 +19,8 @@ public class JsonMap<V> extends HashMap<String, V> {
 
   //Mutators
   public void load() {
-    try {
-      BufferedReader br = new BufferedReader(new FileReader(fileName));
+    try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
       this.putAll(mapper.readValue(br.readLine(), HashMap.class));
-      br.close();
     } catch (Exception e) {
       System.out.println(
           "Could not load data from file: \"" + fileName + "\". The file might not exist"
@@ -31,10 +29,8 @@ public class JsonMap<V> extends HashMap<String, V> {
   }
 
   public void save() {
-    try {
-      BufferedWriter bw = new BufferedWriter(new FileWriter(fileName));
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName))) {
       bw.write(mapper.writeValueAsString(this));
-      bw.close();
     } catch (IOException e) {
       e.printStackTrace();
     }

@@ -3,20 +3,19 @@ package main;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MouseHandler implements MouseListener, Serializable {
+public class MouseHandler implements MouseListener {
   public static final int LMB = MouseEvent.BUTTON1;
   public static final int WHEEL = MouseEvent.BUTTON2;
   public static final int RMB = MouseEvent.BUTTON3;
 
   final int[] mouseButtons = {LMB, WHEEL, RMB};
-  public final transient Map<Integer, Boolean> clicked = new HashMap<>();
-  public final transient Map<Integer, Boolean> pressed = new HashMap<>();
-  public final transient Map<Integer, Long> pressTime = new HashMap<>();
-  public final transient Map<Integer, Point> pressPos = new HashMap<>();
+  public final Map<Integer, Boolean> clicked = new HashMap<>();
+  public final Map<Integer, Boolean> pressed = new HashMap<>();
+  public final Map<Integer, Long> pressTime = new HashMap<>();
+  public final Map<Integer, Point> pressPos = new HashMap<>();
   public final GamePanel gp;
 
   //Constructor

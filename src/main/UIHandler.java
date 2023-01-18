@@ -11,10 +11,10 @@ import java.util.Objects;
 
 public class UIHandler {
   public static final int DEFAULT_FONT_SIZE = 16;
-  public static final Color overlayColor = new Color(0, 0, 0, 63);
-  public static final GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-  public static final GraphicsDevice graphicsDevice = graphicsEnvironment.getDefaultScreenDevice();
-  public static final GraphicsConfiguration graphicsConfig = graphicsDevice.getDefaultConfiguration();
+  public static final Color OVERLAY_COLOR = new Color(0, 0, 0, 63);
+  public static final GraphicsEnvironment GRAPHICS_ENVIRONMENT = GraphicsEnvironment.getLocalGraphicsEnvironment();
+  public static final GraphicsDevice GRAPHICS_DEVICE = GRAPHICS_ENVIRONMENT.getDefaultScreenDevice();
+  public static final GraphicsConfiguration GRAPHICS_CONFIG = GRAPHICS_DEVICE.getDefaultConfiguration();
 
   private final GamePanel gp;
   private final Settings settings;

@@ -29,33 +29,35 @@ public class PauseState implements State {
 
   @Override
   public void onLoad() {
-
+    //Not added yet
   }
 
   @Override
   public void update() {
     if (gp.keyH.getEscTapped()) {
-      gp.stateH.setActive(gp.STATE_GAME);
+      gp.stateH.setActive(GameState.STATE_GAME);
     }
-    if (gp.mouseH.clicked.get(MouseHandler.LMB) && hoveringLowerMenu) {
+    if (Boolean.TRUE.equals(gp.mouseH.clicked.get(MouseHandler.LMB)) && hoveringLowerMenu) {
       switch (hoveredIndex) {
-        case 0 -> gp.stateH.setActive(gp.STATE_GAME);
-        case 3 -> gp.stateH.setActive(gp.STATE_SETTINGS);
-        default -> { }
+        case 0 -> gp.stateH.setActive(GameState.STATE_GAME);
+        case 3 -> gp.stateH.setActive(GameState.STATE_SETTINGS);
+        default -> {
+          //Do nothing
+        }
       }
     }
   }
 
   @Override
   public void onUnload() {
-
+    //Not used
   }
 
   @Override
   public void drawScreen(@NotNull Graphics2D g2) {
     g2.setColor(Color.black);
 
-    gp.stateH.getState(gp.STATE_GAME).drawScreen(g2);
+    gp.stateH.getState(GameState.STATE_GAME).drawScreen(g2);
     menuWindow.draw(g2);
 
     g2.setFont(gp.uiH.titleFont);
@@ -66,7 +68,7 @@ public class PauseState implements State {
     for (int i = 0; i < drawStrArr.length; i++) {
       int textY = menuWindow.lowerRect.y + (i + 1) * (gp.uiH.margin + gp.uiH.fontSize);
       if (i == hoveredIndex && menuWindow.lowerRect.contains(gp.mouseMotionH.mousePos)) {
-        g2.setColor(gp.uiH.overlayColor);
+        g2.setColor(UIHandler.OVERLAY_COLOR);
         g2.fillRect(
             menuWindow.lowerRect.x, textY - gp.uiH.fontSize - gp.uiH.margin / 2,
             menuWindow.lowerRect.width, gp.uiH.fontSize + gp.uiH.margin
@@ -79,47 +81,47 @@ public class PauseState implements State {
 
   @Override
   public void keyTyped(KeyEvent e) {
-
+    //Not used
   }
 
   @Override
   public void keyPressed(KeyEvent e) {
-
+    //Not used
   }
 
   @Override
   public void keyReleased(KeyEvent e) {
-
+    //Not used
   }
 
   @Override
   public void mouseClicked(MouseEvent e) {
-
+    //Not used
   }
 
   @Override
   public void mousePressed(MouseEvent e) {
-
+    //Not used
   }
 
   @Override
   public void mouseReleased(MouseEvent e) {
-
+    //Not used
   }
 
   @Override
   public void mouseEntered(MouseEvent e) {
-
+    //Not used
   }
 
   @Override
   public void mouseExited(MouseEvent e) {
-
+    //Not used
   }
 
   @Override
   public void mouseDragged(MouseEvent e) {
-
+    //Not used
   }
 
   @Override

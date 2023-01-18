@@ -19,7 +19,7 @@ public class MainApp {
 
     window.setLocationRelativeTo(null);
     window.setUndecorated(false);
-    window.add(game);
+    window.add(game.getJPanel());
     window.setVisible(true);
 
     game.startGameThread();
