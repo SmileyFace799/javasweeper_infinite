@@ -1,4 +1,4 @@
-package main;
+package smiley.mainapp;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,11 +15,11 @@ public class MainApp {
     window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     window.setResizable(false);
     window.setTitle("Javasweeper Infinite");
-    window.setSize(new Dimension(game.settings.getDisplayWidth(), game.settings.getDisplayHeight()));
+    window.setSize(new Dimension(Settings.getDisplayWidth(), Settings.getDisplayHeight()));
 
     window.setLocationRelativeTo(null);
     window.setUndecorated(false);
-    window.add(game.getJPanel());
+    window.getContentPane().add(game.getJPanel());
     window.setVisible(true);
 
     game.startGameThread();

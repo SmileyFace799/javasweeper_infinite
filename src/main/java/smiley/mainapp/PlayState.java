@@ -1,8 +1,8 @@
-package main;
+package smiley.mainapp;
 
 
-import squares.NumberSquare;
-import squares.Square;
+import smiley.squares.NumberSquare;
+import smiley.squares.Square;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -48,8 +48,8 @@ public class PlayState implements State {
         Point pressPos = mouseH.pressPos.get(button);
         Point camOffset = gp.getCameraOffset();
         clickedBoardPoints.get(button).setLocation(
-            Math.floorDiv((pressPos.x + camOffset.x), gp.getTileSize()),
-            Math.floorDiv((pressPos.y + camOffset.y), gp.getTileSize())
+            Math.floorDiv((pressPos.x + camOffset.x), Board.getTileSize()),
+            Math.floorDiv((pressPos.y + camOffset.y), Board.getTileSize())
         );
       }
     }
@@ -58,12 +58,12 @@ public class PlayState implements State {
       if (!board.exists(clickedBoardPoints.get(MouseHandler.LMB))) {
         board.generate(clickedBoardPoints.get(MouseHandler.LMB));
       }
-      board.get(clickedBoardPoints.get(MouseHandler.LMB)).reveal();
+      board.reveal(clickedBoardPoints.get(MouseHandler.LMB));
     }
     if (Boolean.TRUE.equals(mouseH.clicked.get(MouseHandler.RMB)) && board.exists(clickedBoardPoints.get(MouseHandler.RMB))) {
       Square clickedSquare = board.get(clickedBoardPoints.get(MouseHandler.RMB));
       if (!clickedSquare.isRevealed()) {
-        clickedSquare.flag();
+        board.flag(clickedSquare);
       }
     } else if (Boolean.TRUE.equals(mouseH.clicked.get(MouseHandler.WHEEL))) {
       Point pos = clickedBoardPoints.get(MouseHandler.WHEEL); //pos: Location clicked by the mouse-wheel
@@ -86,7 +86,7 @@ public class PlayState implements State {
             for (int y = pos.y - 1; y <= pos.y + 1; y++) {
               Square squareToReveal = board.get(x, y);
               if (!squareToReveal.isFlagged()) {
-                squareToReveal.reveal();
+                board.reveal(x, y);
               }
             }
           }
@@ -114,8 +114,8 @@ public class PlayState implements State {
     Board board = gp.getBoard();
     Point camOffset = gp.getCameraOffset();
     g2.drawImage(board.getImage(),
-        board.getMinX() * gp.getTileSize() - camOffset.x,
-        board.getMinY() * gp.getTileSize() - camOffset.y,
+        board.getMinX() * Board.getTileSize() - camOffset.x,
+        board.getMinY() * Board.getTileSize() - camOffset.y,
         null
     );
   }

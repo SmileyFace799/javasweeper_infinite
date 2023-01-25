@@ -1,4 +1,4 @@
-package main;
+package smiley.mainapp;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -8,7 +8,6 @@ import java.awt.event.MouseEvent;
 
 public class PauseState implements State {
   private final GamePanel gp;
-  private final Settings settings;
 
   private final MenuWindow menuWindow;
   private boolean hoveringLowerMenu;
@@ -16,9 +15,8 @@ public class PauseState implements State {
 
   public PauseState(GamePanel gp) {
     this.gp = gp;
-    this.settings = gp.settings;
 
-    double uiScale = settings.getUiScale();
+    double uiScale = Settings.getUiScale();
     this.menuWindow = gp.uiH.makeSubWindow(
         (int) Math.round(150 * uiScale),
         gp.uiH.titleFontSize + 2 * gp.uiH.margin,

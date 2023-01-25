@@ -1,4 +1,4 @@
-package main;
+package smiley.mainapp;
 
 import java.util.HashMap;
 

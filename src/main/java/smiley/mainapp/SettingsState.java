@@ -1,4 +1,4 @@
-package main;
+package smiley.mainapp;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -8,7 +8,6 @@ import java.awt.event.MouseEvent;
 
 public class SettingsState implements State {
   private final GamePanel gp;
-  private final Settings settings;
   private final MenuWindow menuWindow;
   private final Slider mineChanceSlider;
 
@@ -17,18 +16,17 @@ public class SettingsState implements State {
 
   public SettingsState(GamePanel gp) {
     this.gp = gp;
-    this.settings = gp.settings;
 
     this.menuWindow = gp.uiH.makeSubWindow(
-        (int) Math.round(250 * settings.getUiScale()),
+        (int) Math.round(250 * Settings.getUiScale()),
         gp.uiH.titleFontSize + 2 * gp.uiH.margin,
-        (int) Math.round(100 * settings.getUiScale())
+        (int) Math.round(100 * Settings.getUiScale())
     );
     gp.uiH.centerSubWindow(menuWindow);
-    int sliderWidth = (int) Math.round(75 * settings.getUiScale());
+    int sliderWidth = (int) Math.round(75 * Settings.getUiScale());
     this.mineChanceSlider = gp.uiH.makeSlider(
         menuWindow.lowerRect.x + menuWindow.lowerRect.width
-            - (int) Math.round(45 * settings.getUiScale()) - sliderWidth,
+            - (int) Math.round(45 * Settings.getUiScale()) - sliderWidth,
         menuWindow.lowerRect.y + gp.uiH.margin * 2 + gp.uiH.fontSize,
         sliderWidth, gp.uiH.fontSize,
         0.0
@@ -43,7 +41,7 @@ public class SettingsState implements State {
   @Override
   public void update() {
     if (gp.keyH.getEscTapped()) {
-      gp.stateH.setActive(gp.STATE_GAME);
+      gp.stateH.setActive(GameState.STATE_GAME);
     }
   }
 
@@ -56,7 +54,7 @@ public class SettingsState implements State {
   public void drawScreen(@NotNull Graphics2D g2) {
     g2.setColor(Color.black);
 
-    gp.stateH.getState(gp.STATE_GAME).drawScreen(g2);
+    gp.stateH.getState(GameState.STATE_GAME).drawScreen(g2);
     menuWindow.draw(g2);
 
     g2.setFont(gp.uiH.titleFont);
@@ -67,7 +65,7 @@ public class SettingsState implements State {
     for (int i = 0; i < drawStrArr.length; i++) {
       int textY = menuWindow.lowerRect.y + (i + 1) * (gp.uiH.margin + gp.uiH.fontSize);
       if (!drawStrArr[i].equals("") && i == hoveredIndex && menuWindow.lowerRect.contains(gp.mouseMotionH.mousePos)) {
-        g2.setColor(gp.uiH.overlayColor);
+        g2.setColor(UIHandler.OVERLAY_COLOR);
         g2.fillRect(
             menuWindow.lowerRect.x, textY - gp.uiH.fontSize - gp.uiH.margin / 2,
             menuWindow.lowerRect.width, gp.uiH.fontSize + gp.uiH.margin

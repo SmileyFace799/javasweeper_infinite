@@ -1,4 +1,4 @@
-package main;
+package smiley.mainapp;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +17,6 @@ public class UIHandler {
   public static final GraphicsConfiguration GRAPHICS_CONFIG = GRAPHICS_DEVICE.getDefaultConfiguration();
 
   private final GamePanel gp;
-  private final Settings settings;
-  private final TxMap txMap;
   private final StateHandler stateH;
 
   public final int margin;
@@ -29,18 +27,16 @@ public class UIHandler {
   public final Font titleFont;
   public final HashMap<Integer, Color> numColors = new HashMap<>();
 
-  private BufferedImage display;
-  private Graphics2D displayG2;
+  private final BufferedImage display;
+  private final Graphics2D displayG2;
   private int windowWidth; //Width of the actual game window
   private int windowHeight; //Height of the actual game window
 
   public UIHandler(GamePanel gp) {
     this.gp = gp;
-    this.settings = gp.settings;
-    this.txMap = gp.txMap;
     this.stateH = gp.stateH;
 
-    double uiScale = settings.getUiScale();
+    double uiScale = Settings.getUiScale();
     this.margin = (int) Math.round(uiScale * 3);
     this.defaultFont = new Font("Arial", Font.PLAIN, DEFAULT_FONT_SIZE);
     this.fontSize = (int) Math.round(uiScale * 8);
@@ -59,7 +55,7 @@ public class UIHandler {
     this.font = loadedFont.deriveFont(Font.PLAIN, fontSize);
     this.titleFont = loadedFont.deriveFont(Font.PLAIN, titleFontSize);
 
-    this.display = makeFormattedImage(settings.getDisplayWidth(), settings.getDisplayHeight());
+    this.display = makeFormattedImage(Settings.getDisplayWidth(), Settings.getDisplayHeight());
     this.displayG2 = display.createGraphics();
 
     numColors.put(1, new Color(0, 0, 255));
@@ -93,7 +89,7 @@ public class UIHandler {
    * @see #drawStringCentered(Graphics2D, String, int)
    */
   public int getCenterX(int width) {
-    return (settings.getDisplayWidth() - width) / 2;
+    return (Settings.getDisplayWidth() - width) / 2;
   }
 
   /**
@@ -109,7 +105,7 @@ public class UIHandler {
    * @see #getCenterX(int)
    */
   public int getCenterY(int height) {
-    return (settings.getDisplayHeight() - height) / 2;
+    return (Settings.getDisplayHeight() - height) / 2;
   }
 
   /**
@@ -120,7 +116,7 @@ public class UIHandler {
    * @return The x-coordinate scaled to the display
    */
   public int scaleXToDisplay(int windowX) {
-    return Math.round(windowX * (settings.getDisplayWidth() / (float) windowWidth));
+    return Math.round(windowX * (Settings.getDisplayWidth() / (float) windowWidth));
   }
 
   /**
@@ -131,7 +127,7 @@ public class UIHandler {
    * @return The y-coordinate scaled to the display
    */
   public int scaleYToDisplay(int windowY) {
-    return Math.round(windowY * (settings.getDisplayHeight() / (float) windowHeight));
+    return Math.round(windowY * (Settings.getDisplayHeight() / (float) windowHeight));
   }
 
   /**
@@ -172,7 +168,7 @@ public class UIHandler {
    * @see MenuWindow
    */
   public MenuWindow makeSubWindow(int x, int y, int width, int upperHeight, int lowerHeight) {
-    return new MenuWindow(x, y, width, upperHeight, lowerHeight, gp.txMap, settings.getUiScale());
+    return new MenuWindow(x, y, width, upperHeight, lowerHeight, Settings.getUiScale());
   }
 
   //Mutators
@@ -239,7 +235,7 @@ public class UIHandler {
     } else if (defaultValue < 0 || defaultValue > 1) {
       throw new RuntimeException("UI.makeSlider: Expected defaultValue between 0 and 1 (Got \"" + defaultValue + "\")");
     }
-    return new Slider(x, y, width, height, defaultValue, settings.getUiScale());
+    return new Slider(x, y, width, height, defaultValue, Settings.getUiScale());
   }
 
   /**
@@ -252,7 +248,7 @@ public class UIHandler {
    * @see Graphics2D#drawString(String, int, int)
    */
   public void drawStringCentered(@NotNull Graphics2D g2, String str, int y) {
-    g2.drawString(str, (settings.getDisplayWidth() - g2.getFontMetrics().stringWidth(str)) / 2, y);
+    g2.drawString(str, (Settings.getDisplayWidth() - g2.getFontMetrics().stringWidth(str)) / 2, y);
   }
 
   public void drawStringRightAligned(@NotNull Graphics2D g2, String str, int rightX, int y) {
@@ -260,26 +256,26 @@ public class UIHandler {
   }
 
   public void setupScreen() {
-    if (settings.isFullscreen()) {
-      Rectangle screenBounds = graphicsConfig.getBounds();
+    if (Settings.isFullscreen()) {
+      Rectangle screenBounds = GRAPHICS_CONFIG.getBounds();
       windowWidth = screenBounds.width;
       windowHeight = screenBounds.height;
-      if (graphicsDevice.getFullScreenWindow() == null) {
+      if (GRAPHICS_DEVICE.getFullScreenWindow() == null) {
         gp.setWindowUndecorated(true);
-        graphicsDevice.setFullScreenWindow(gp.getWindow());
+        GRAPHICS_DEVICE.setFullScreenWindow(gp.getWindow());
       }
     } else {
-      windowWidth = settings.getDisplayWidth();
-      windowHeight = settings.getDisplayHeight();
-      if (graphicsDevice.getFullScreenWindow() != null) {
+      windowWidth = Settings.getDisplayWidth();
+      windowHeight = Settings.getDisplayHeight();
+      if (GRAPHICS_DEVICE.getFullScreenWindow() != null) {
         gp.setWindowUndecorated(false);
-        graphicsDevice.setFullScreenWindow(null);
+        GRAPHICS_DEVICE.setFullScreenWindow(null);
       }
     }
   }
 
   public void toggleFullscreen() {
-    settings.toggleFullscreen();
+    Settings.toggleFullscreen();
     setupScreen();
   }
 
@@ -290,29 +286,14 @@ public class UIHandler {
    * @param height The height of the image in pixels
    * @return The newly made image
    */
-  public BufferedImage makeFormattedImage(int width, int height) {
-    return graphicsConfig.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
-  }
-
-  /**
-   * Converts an image to the same format as the screen, making the drawing process way quicker.
-   * <br/>This does not modify the provided image, but instead returns a formatted copy
-   *
-   * @param image The image to be converted
-   * @return The new converted image
-   */
-  public BufferedImage convertFormat(BufferedImage image) {
-    BufferedImage convertedImage = makeFormattedImage(image.getWidth(), image.getHeight());
-    Graphics2D g2 = convertedImage.createGraphics();
-    g2.drawImage(image, 0, 0, null);
-    g2.dispose();
-    return convertedImage;
+  public static BufferedImage makeFormattedImage(int width, int height) {
+    return GRAPHICS_CONFIG.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
   }
 
   public void drawScreen(Graphics2D g2, boolean debugEnabled) {
     displayG2.setFont(font);
     displayG2.setColor(Color.black);
-    displayG2.fillRect(0, 0, settings.getDisplayWidth(), settings.getDisplayHeight());
+    displayG2.fillRect(0, 0, Settings.getDisplayWidth(), Settings.getDisplayHeight());
     long drawStart = System.nanoTime();
 
     gp.stateH.getActive().drawScreen(displayG2);
@@ -325,6 +306,5 @@ public class UIHandler {
       g2.drawString("Draw time: " + (drawTime / 1e6) + "ms", 10, 20);
       g2.drawString("Effective FPS: " + (1e9 / drawTime), 10, 40);
     }
-
   }
 }

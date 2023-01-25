@@ -1,4 +1,4 @@
-package main;
+package smiley.mainapp;
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;

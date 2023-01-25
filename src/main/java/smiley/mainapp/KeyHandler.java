@@ -1,4 +1,4 @@
-package main;
+package smiley.mainapp;
 
 import org.jetbrains.annotations.NotNull;
 

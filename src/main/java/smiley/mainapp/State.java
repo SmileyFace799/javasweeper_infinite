@@ -1,4 +1,4 @@
-package main;
+package smiley.mainapp;
 
 import java.awt.*;
 import java.awt.event.KeyListener;

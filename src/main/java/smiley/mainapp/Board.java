@@ -1,4 +1,4 @@
-package main;
+package smiley.mainapp;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -8,20 +8,19 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import org.jetbrains.annotations.NotNull;
-import squares.BombSquare;
-import squares.NumberSquare;
-import squares.Square;
+import smiley.squares.BombSquare;
+import smiley.squares.NumberSquare;
+import smiley.squares.Square;
 
 public class Board {
+
+  public static final int ORIGINAL_TILE_SIZE = 16;
 
   private final HashMap<Integer, HashMap<Integer, Square>> boardMap = new HashMap<>();
   final double mineChance;
   final GamePanel gp;
-  final int tileSize;
   private BufferedImage image;
   private String associatedFilename;
 
@@ -32,20 +31,21 @@ public class Board {
 
 
   public Board(GamePanel gp) { //Defaults to 0 mineChance
-    this.mineChance = 0;
-    this.gp = gp;
-    this.tileSize = gp.getTileSize();
+    this(0, gp);
   }
 
   public Board(double mineChance, GamePanel gp) {
     this.mineChance = mineChance;
     this.gp = gp;
-    this.tileSize = gp.getTileSize();
   }
 
   //Accessors
   public Map<Integer, HashMap<Integer, Square>> getBoardMap() {
     return boardMap;
+  }
+
+  public static int getTileSize() {
+    return (int) Math.round(ORIGINAL_TILE_SIZE * Settings.getBoardScale());
   }
 
   public int getMinX() {
@@ -54,10 +54,6 @@ public class Board {
 
   public int getMinY() {
     return minY;
-  }
-
-  public int getTileSize() {
-    return tileSize;
   }
 
   public double getMineChance() {
@@ -93,6 +89,26 @@ public class Board {
     return get(x, y) instanceof BombSquare;
   }
 
+  public List<Square> getSquareList() {
+    ArrayList<Square> squareList = new ArrayList<>();
+    for (HashMap<Integer, Square> column : boardMap.values()) {
+      squareList.addAll(column.values());
+    }
+    return squareList;
+  }
+
+  public List<int[]> getAdjacentPoints(int x, int y) {
+    ArrayList<int[]> adjacentPoints = new ArrayList<>();
+    for (int adjX = x - 1; adjX <= x + 1; adjX++) {
+      for (int adjY = y - 1; adjY <= y + 1; adjY++) {
+        if (x != adjX || y != adjY) {
+          adjacentPoints.add(new int[]{adjX, adjY});
+        }
+      }
+    }
+    return adjacentPoints;
+  }
+
   //Mutators
   public void generate(@NotNull Point pos) {
     generate(pos.x, pos.y);
@@ -105,9 +121,9 @@ public class Board {
   public void generate(int x, int y, double mineChance) {
     Square square;
     if (Math.random() < mineChance) {
-      square = new BombSquare(x, y, this, gp.txMap);
+      square = new BombSquare(x, y);
     } else {
-      square = new NumberSquare(x, y, this, gp.txMap);
+      square = new NumberSquare(x, y);
     }
     put(x, y, square);
   }
@@ -117,7 +133,9 @@ public class Board {
   }
 
   public void put(int x, int y, Square square, boolean updateImg) {
-    boardMap.computeIfAbsent(x, xVal -> boardMap.put(xVal, new HashMap<>()));
+    if (!boardMap.containsKey(x)) {
+      boardMap.put(x, new HashMap<>());
+    }
 
     if (!boardMap.get(x).containsKey(y)) {
       boardMap.get(x).put(y, square);
@@ -128,6 +146,52 @@ public class Board {
       updateImage(square);
     }
   }
+  public void flag(int x, int y) {
+    flag(get(x, y));
+  }
+  public void flag(Square square) {
+    square.toggleFlagged();
+    updateImage(square);
+  }
+
+  public void reveal(Point p) {
+    reveal(p.x, p.y);
+  }
+
+  public void reveal(int x, int y) {
+    reveal(x, y, mineChance);
+  }
+
+  public void reveal(int x, int y, double generateMineChance) {
+    reveal(x, y, generateMineChance, true);
+  }
+
+  public void reveal(int x, int y, double generateMineChance, boolean doMassReveal) {
+
+    Square square = get(x, y);
+    if (!square.isFlagged() && !square.isRevealed()) {
+      if (square instanceof NumberSquare numSquare) {
+        int squareNumber = 0;
+        for (int xVal = x - 1; xVal <= x + 1; xVal++) {
+          for (int yVal = y - 1; yVal <= y + 1; yVal++) {
+            if (!exists(xVal, yVal)) {
+              generate(xVal, yVal, generateMineChance);
+            }
+            if (isBomb(xVal, yVal)) {
+              squareNumber++;
+            }
+          }
+        }
+        numSquare.setRevealedTrue(squareNumber);
+        if (squareNumber == 0 && doMassReveal) {
+          massReveal(x, y);
+        }
+      } else if (square instanceof BombSquare bombSquare) {
+        bombSquare.setRevealedTrue();
+      }
+    }
+    updateImage(square);
+  }
 
   public void massReveal(int x, int y) {
     Board revealBoard = new Board(gp);
@@ -137,29 +201,23 @@ public class Board {
 
   private void massReveal(Board revealBoard, int recursionCount) {
     Board nextRevealBoard = new Board(gp);
-    for (Map.Entry<Integer, HashMap<Integer, Square>> entryX : revealBoard.getBoardMap().entrySet()) {
-      int x = entryX.getKey();
-      for (int y : entryX.getValue().keySet()) {
-        NumberSquare revealSquare = (NumberSquare) get(x, y);
-        revealSquare.reveal(mineChance, false);
-        if (revealSquare.getNumber() == 0 && recursionCount > 0) {
-          for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-              NumberSquare surroundingSquare = (NumberSquare) get(x + dx, y + dy);
-              if (
-                  !nextRevealBoard.exists(x + dx, y + dy)
-                      && !surroundingSquare.isRevealed()
-                      &&
-                      !surroundingSquare.isFlagged()
-              ) {
-                nextRevealBoard.put(x + dx, y + dy, surroundingSquare);
-              }
-            }
+    for (Square square : revealBoard.getSquareList()) {
+      NumberSquare revealSquare = (NumberSquare) square;
+      reveal(revealSquare.getX(), revealSquare.getY(), mineChance, false);
+      if (revealSquare.getNumber() == 0 && recursionCount > 0) {
+        for (int[] xy : getAdjacentPoints(revealSquare.getX(), revealSquare.getY())) {
+          Square surroundingSquare = get(xy[0], xy[1]);
+          if (
+              !nextRevealBoard.exists(xy[0], xy[1])
+                  && !surroundingSquare.isRevealed()
+                  && !surroundingSquare.isFlagged()
+          ) {
+            nextRevealBoard.put(xy[0], xy[1], surroundingSquare);
           }
         }
       }
     }
-    if (recursionCount > 0) {
+    if (recursionCount > 0 && !nextRevealBoard.getBoardMap().isEmpty()) {
       massReveal(nextRevealBoard, recursionCount - 1);
     }
   }
@@ -169,7 +227,8 @@ public class Board {
    * Squares outside minX, minY, maxX & maxY will be out of bounds & not drawn
    */
   public void drawInitialImage() {
-    image = gp.uiH.makeFormattedImage(
+    int tileSize = getTileSize();
+    image = UIHandler.makeFormattedImage(
         (1 + (maxX - minX)) * tileSize,
         (1 + (maxY - minY)) * tileSize
     );
@@ -192,6 +251,7 @@ public class Board {
   public void updateImage(Square square) {
     int x = square.getX();
     int y = square.getY();
+    int tileSize = getTileSize();
     if (this.image == null) {
       minX = x;
       minY = y;
@@ -244,50 +304,61 @@ public class Board {
     g2.dispose();
   }
 
+  private Square makeNumberSquare(String squareStr) {
+    String[] squareArr = squareStr.split("&");
+    Square square;
+    int x = Integer.parseInt(squareArr[1]);
+    int y = Integer.parseInt(squareArr[2]);
+    if (Objects.equals(squareArr[0], "number")) {
+      square = new NumberSquare(x, y);
+      NumberSquare numSquare = (NumberSquare) square;
+      if (Boolean.parseBoolean(squareArr[4])) {
+        numSquare.setRevealedTrue(Integer.parseInt(squareArr[5]));
+      }
+    } else if (Objects.equals(squareArr[0], "bomb")) {
+      square = new BombSquare(x, y);
+    } else {
+      throw new RuntimeException("Cannot recognize square: " + squareArr[0]);
+    }
+    if (Boolean.parseBoolean(squareArr[3])) {
+      square.toggleFlagged();
+    }
+    return square;
+  }
+
+  private void updateBoardBounds(int x, int y) {
+    if (boardMap.isEmpty()) {
+      minX = x;
+      minY = y;
+      maxX = x;
+      maxY = y;
+    } else {
+      if (x < minX) {
+        minX = x;
+      } else if (x > maxX) {
+        maxX = x;
+      }
+      if (y < minY) {
+        minY = y;
+      } else if (y > maxY) {
+        maxY = y;
+      }
+    }
+  }
+
   public void load(String filename) {
     associatedFilename = filename;
-    try {
-      BufferedReader br = new BufferedReader(new FileReader(filename));
+    try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
       String boardStr = br.readLine();
       for (String squareStr : boardStr.split("\\|")) {
-        String[] squareArr = squareStr.split("&");
-        Square square;
-        int x = Integer.parseInt(squareArr[1]);
-        int y = Integer.parseInt(squareArr[2]);
-        if (Objects.equals(squareArr[0], "number")) {
-          square = new NumberSquare(x, y, this, gp.txMap);
-          NumberSquare numSquare = (NumberSquare) square;
-          if (Boolean.parseBoolean(squareArr[4])) {
-            numSquare.setRevealed(Integer.parseInt(squareArr[5]));
-          }
-        } else if (Objects.equals(squareArr[0], "bomb")) {
-          square = new BombSquare(x, y, this, gp.txMap);
-        } else {
-          throw new RuntimeException("Cannot recognize square: " + squareArr[0]);
-        }
-        if (Boolean.parseBoolean(squareArr[3])) {
-          square.flag();
-        }
-        if (boardMap.isEmpty()) {
-          minX = x;
-          minY = y;
-          maxX = x;
-          maxY = y;
-        } else {
-          if (x < minX) {
-            minX = x;
-          } else if (x > maxX) {
-            maxX = x;
-          }
-          if (y < minY) {
-            minY = y;
-          } else if (y > maxY) {
-            maxY = y;
-          }
-        }
-        put(x, y, square, false);
+        Square square = makeNumberSquare(squareStr);
+        int x = square.getX();
+        int y = square.getY();
+        updateBoardBounds(x, y);
+        this.put(x, y, square, false);
+
+
       }
-      br.close();
       drawInitialImage();
     } catch (IOException e) {
       System.out.println(

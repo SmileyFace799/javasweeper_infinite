@@ -1,37 +1,40 @@
-package main;
+package smiley.mainapp;
 
-import java.io.Serializable;
+public class Settings {
+  private static final JsonMap<Object> json = new JsonMap<>("src/main/resources/settings.json");
 
-public class Settings implements Serializable {
-  private static final JsonMap<Object> json = new JsonMap<>("res/settings.json");
+  //Constructor
+  private Settings() {
+    throw new IllegalStateException("Utility class");
+  }
 
   //Accessors
-  public int getDisplayWidth() {
+  public static int getDisplayWidth() {
     return (int) json.get("displayWidth");
   }
 
-  public int getDisplayHeight() {
+  public static int getDisplayHeight() {
     return (int) json.get("displayHeight");
   }
 
-  public double getMineChance() {
+  public static double getMineChance() {
     return (double) json.get("mineChance");
   }
 
-  public double getBoardScale() {
+  public static double getBoardScale() {
     return (double) json.get("boardScale");
   }
 
-  public double getUiScale() {
+  public static double getUiScale() {
     return (double) json.get("uiScale");
   }
 
-  public boolean isFullscreen() {
+  public static boolean isFullscreen() {
     return (boolean) json.get("fullscreen");
   }
 
   //Mutators
-  public void setDisplayWidth(int width) {
+  public static void setDisplayWidth(int width) {
     if (width >= 0) {
       json.put("displayWidth", width);
       json.save();
@@ -40,7 +43,7 @@ public class Settings implements Serializable {
     }
   }
 
-  public void setDisplayHeight(int height) {
+  public static void setDisplayHeight(int height) {
     if (height >= 0) {
       json.put("displayHeight", height);
       json.save();
@@ -49,7 +52,7 @@ public class Settings implements Serializable {
     }
   }
 
-  public void setMineChance(double mineChance) {
+  public static void setMineChance(double mineChance) {
     if (mineChance >= 0 && mineChance <= 100) {
       json.put("mineChance", mineChance);
       json.save();
@@ -58,7 +61,7 @@ public class Settings implements Serializable {
     }
   }
 
-  public void setBoardScale(double boardScale) {
+  public static void setBoardScale(double boardScale) {
     if (boardScale > 0) {
       json.put("boardScale", boardScale);
       json.save();
@@ -67,7 +70,7 @@ public class Settings implements Serializable {
     }
   }
 
-  public void setUiScale(double uiScale) {
+  public static void setUiScale(double uiScale) {
     if (uiScale > 0) {
       json.put("uiScale", uiScale);
       json.save();
@@ -76,7 +79,7 @@ public class Settings implements Serializable {
     }
   }
 
-  public void toggleFullscreen() {
+  public static void toggleFullscreen() {
     json.put("fullscreen", !isFullscreen());
     json.save();
   }

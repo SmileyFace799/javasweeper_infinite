@@ -1,4 +1,4 @@
-package main;
+package smiley.mainapp;
 
 public enum GameState {
   STATE_GAME,
