@@ -7,9 +7,9 @@ import javax.swing.*;
 public class GamePanel {
 
   //CONSTANTS
-  private final JFrame window;
   public static final int FPS = 60;
 
+  private final JFrame window;
   private final JPanel jPanel = new JPanel() {
     @Override
     protected void paintComponent(Graphics g) {

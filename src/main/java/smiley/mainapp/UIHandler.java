@@ -17,7 +17,6 @@ public class UIHandler {
   public static final GraphicsConfiguration GRAPHICS_CONFIG = GRAPHICS_DEVICE.getDefaultConfiguration();
 
   private final GamePanel gp;
-  private final StateHandler stateH;
 
   public final int margin;
   public final Font defaultFont;
@@ -34,7 +33,6 @@ public class UIHandler {
 
   public UIHandler(GamePanel gp) {
     this.gp = gp;
-    this.stateH = gp.stateH;
 
     double uiScale = Settings.getUiScale();
     this.margin = (int) Math.round(uiScale * 3);
@@ -300,8 +298,10 @@ public class UIHandler {
     g2.drawImage(display, 0, 0, windowWidth, windowHeight, null);
 
     if (debugEnabled) {
-      g2.setColor(Color.white);
       g2.setFont(defaultFont);
+      g2.setColor(Color.black);
+      g2.fillRect(0, 0, 275, 50);
+      g2.setColor(Color.white);
       long drawTime = (System.nanoTime() - drawStart);
       g2.drawString("Draw time: " + (drawTime / 1e6) + "ms", 10, 20);
       g2.drawString("Effective FPS: " + (1e9 / drawTime), 10, 40);
