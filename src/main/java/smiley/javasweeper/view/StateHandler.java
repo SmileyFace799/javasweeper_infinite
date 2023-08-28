@@ -1,6 +1,8 @@
-package smiley.mainapp;
+package smiley.javasweeper.view;
 
 import java.util.HashMap;
+import smiley.javasweeper.view.screens.GameState;
+import smiley.javasweeper.view.screens.State;
 
 public class StateHandler {
   final HashMap<GameState, State> states = new HashMap<>();

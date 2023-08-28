@@ -1,4 +1,4 @@
-package smiley.mainapp;
+package smiley.javasweeper.controllers;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Objects;
+import smiley.javasweeper.view.screens.GamePanel;
+import smiley.javasweeper.view.components.MenuWindow;
+import smiley.javasweeper.filestorage.Settings;
+import smiley.javasweeper.view.components.Slider;
 
 public class UIHandler {
   public static final int DEFAULT_FONT_SIZE = 16;

@@ -1,10 +1,11 @@
-package smiley.mainapp;
+package smiley.javasweeper.controllers;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.Serializable;
+import smiley.javasweeper.view.screens.GamePanel;
 
 public class KeyHandler implements KeyListener, Serializable {
   private boolean escPressed = false;

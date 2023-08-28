@@ -1,14 +1,19 @@
-package smiley.mainapp;
+package smiley.javasweeper.view.screens;
 
 
-import smiley.squares.NumberSquare;
-import smiley.squares.Square;
+import smiley.javasweeper.squares.NumberSquare;
+import smiley.javasweeper.squares.Square;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
+import smiley.javasweeper.view.StateHandler;
+import smiley.javasweeper.model.Board;
+import smiley.javasweeper.controllers.KeyHandler;
+import smiley.javasweeper.controllers.MouseHandler;
+import smiley.javasweeper.controllers.UIHandler;
 
 /**
  * Represents a state where the game is being played

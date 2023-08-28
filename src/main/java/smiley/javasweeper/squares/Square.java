@@ -1,8 +1,8 @@
-package smiley.squares;
+package smiley.javasweeper.squares;
 
 import java.awt.image.BufferedImage;
-import smiley.mainapp.Board;
-import smiley.mainapp.TxMap;
+import smiley.javasweeper.model.Board;
+import smiley.javasweeper.textures.TxMap;
 
 public abstract class Square {
   protected final int xval;

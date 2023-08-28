@@ -1,7 +1,9 @@
-package smiley.mainapp;
+package smiley.javasweeper;
 
 import javax.swing.*;
 import java.awt.*;
+import smiley.javasweeper.filestorage.Settings;
+import smiley.javasweeper.view.screens.GamePanel;
 
 public class MainApp {
   public static void main(String[] args) {

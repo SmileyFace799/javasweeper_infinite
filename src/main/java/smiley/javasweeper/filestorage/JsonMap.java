@@ -1,4 +1,4 @@
-package smiley.mainapp;
+package smiley.javasweeper.filestorage;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

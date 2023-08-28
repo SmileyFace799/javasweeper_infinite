@@ -1,8 +1,9 @@
-package smiley.mainapp;
+package smiley.javasweeper.controllers;
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import smiley.javasweeper.view.screens.GamePanel;
 
 public class MouseMotionHandler implements MouseMotionListener {
   final GamePanel gp;

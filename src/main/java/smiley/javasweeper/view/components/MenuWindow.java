@@ -1,9 +1,11 @@
-package smiley.mainapp;
+package smiley.javasweeper.view.components;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import smiley.javasweeper.controllers.UIHandler;
+import smiley.javasweeper.textures.TxMap;
 
 /**
  * Represents a menu window with two areas, one upper and lower area, and border

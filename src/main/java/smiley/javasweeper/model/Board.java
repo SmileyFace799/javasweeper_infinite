@@ -1,4 +1,4 @@
-package smiley.mainapp;
+package smiley.javasweeper.model;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -10,9 +10,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import org.jetbrains.annotations.NotNull;
-import smiley.squares.BombSquare;
-import smiley.squares.NumberSquare;
-import smiley.squares.Square;
+import smiley.javasweeper.controllers.UIHandler;
+import smiley.javasweeper.filestorage.Settings;
+import smiley.javasweeper.squares.BombSquare;
+import smiley.javasweeper.squares.NumberSquare;
+import smiley.javasweeper.squares.Square;
+import smiley.javasweeper.view.screens.GamePanel;
 
 public class Board {
 

@@ -1,4 +1,4 @@
-package smiley.mainapp;
+package smiley.javasweeper.view.components;
 
 import java.awt.*;
 

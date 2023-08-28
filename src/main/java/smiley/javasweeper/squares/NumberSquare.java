@@ -1,7 +1,7 @@
-package smiley.squares;
+package smiley.javasweeper.squares;
 
-import smiley.mainapp.Board;
-import smiley.mainapp.TxMap;
+import smiley.javasweeper.model.Board;
+import smiley.javasweeper.textures.TxMap;
 
 public class NumberSquare extends Square {
   private int number;

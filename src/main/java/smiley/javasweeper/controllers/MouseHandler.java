@@ -1,10 +1,11 @@
-package smiley.mainapp;
+package smiley.javasweeper.controllers;
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.Map;
+import smiley.javasweeper.view.screens.GamePanel;
 
 public class MouseHandler implements MouseListener {
   public static final int LMB = MouseEvent.BUTTON1;

@@ -1,4 +1,4 @@
-package smiley.mainapp;
+package smiley.javasweeper.view.screens;
 
 import java.awt.*;
 import java.awt.event.KeyListener;

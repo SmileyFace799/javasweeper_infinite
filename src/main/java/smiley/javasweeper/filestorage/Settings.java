@@ -1,4 +1,4 @@
-package smiley.mainapp;
+package smiley.javasweeper.filestorage;
 
 public class Settings {
   private static final JsonMap<Object> json = new JsonMap<>("src/main/resources/settings.json");

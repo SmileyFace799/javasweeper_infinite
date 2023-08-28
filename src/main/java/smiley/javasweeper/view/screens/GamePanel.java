@@ -1,8 +1,18 @@
-package smiley.mainapp;
+package smiley.javasweeper.view.screens;
 
-import smiley.squares.NumberSquare;
 import java.awt.*;
 import javax.swing.*;
+import smiley.javasweeper.controllers.KeyHandler;
+import smiley.javasweeper.controllers.MouseHandler;
+import smiley.javasweeper.controllers.MouseMotionHandler;
+import smiley.javasweeper.controllers.UIHandler;
+import smiley.javasweeper.filestorage.Settings;
+import smiley.javasweeper.model.Board;
+import smiley.javasweeper.view.StateHandler;
+import smiley.javasweeper.view.screens.GameState;
+import smiley.javasweeper.view.screens.PauseState;
+import smiley.javasweeper.view.screens.PlayState;
+import smiley.javasweeper.view.screens.SettingsState;
 
 public class GamePanel {
 

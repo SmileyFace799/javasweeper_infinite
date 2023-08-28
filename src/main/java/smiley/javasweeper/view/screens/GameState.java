@@ -1,4 +1,4 @@
-package smiley.mainapp;
+package smiley.javasweeper.view.screens;
 
 public enum GameState {
   STATE_GAME,
