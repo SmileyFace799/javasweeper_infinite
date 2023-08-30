@@ -15,7 +15,7 @@ import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.squares.BombSquare;
 import smiley.javasweeper.squares.NumberSquare;
 import smiley.javasweeper.squares.Square;
-import smiley.javasweeper.view.screens.GamePanel;
+import smiley.javasweeper.view.GamePanel;
 
 public class Board {
 
@@ -23,7 +23,6 @@ public class Board {
 
   private final HashMap<Integer, HashMap<Integer, Square>> boardMap = new HashMap<>();
   final double mineChance;
-  final GamePanel gp;
   private BufferedImage image;
   private String associatedFilename;
 
@@ -39,7 +38,6 @@ public class Board {
 
   public Board(double mineChance, GamePanel gp) {
     this.mineChance = mineChance;
-    this.gp = gp;
   }
 
   //Accessors

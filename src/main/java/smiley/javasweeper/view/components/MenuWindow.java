@@ -13,10 +13,10 @@ import smiley.javasweeper.textures.TxMap;
  * @see UIHandler#makeSubWindow(int, int, int, int, int)
  */
 public class MenuWindow {
-  final BufferedImage img;
-  final Rectangle boundingRect;
-  final Rectangle upperRect;
-  final Rectangle lowerRect;
+  private final BufferedImage img;
+  private final Rectangle boundingRect;
+  private final Rectangle upperRect;
+  private final Rectangle lowerRect;
 
   /**
    * Constructor for MenuWindow.
@@ -70,15 +70,15 @@ public class MenuWindow {
    */
   public MenuWindow(int x, int y, int width, int upperHeight, int lowerHeight, double scale) {
     if (width < 0) {
-      throw new RuntimeException(
+      throw new IllegalArgumentException(
           "MenuWindow: Parameter \"width\" must be 0 or greater (received \"" + width + "\")"
       );
     } else if (upperHeight < 0) {
-      throw new RuntimeException(
+      throw new IllegalArgumentException(
           "MenuWindow: Parameter \"upperHeight\" must be 0 or greater (received \"" + upperHeight + "\")"
       );
     } else if (lowerHeight < 0) {
-      throw new RuntimeException(
+      throw new IllegalArgumentException(
           "MenuWindow: Parameter \"lowerHeight\" must be 0 or greater (received \"" + lowerHeight + "\")"
       );
     }
@@ -154,6 +154,10 @@ public class MenuWindow {
         y + topLeftCorner.getHeight() + upperHeight + midLeftCorner.getHeight(),
         width, lowerHeight
     );
+  }
+
+  public Rectangle getBoundingRect() {
+    return boundingRect;
   }
 
   /**

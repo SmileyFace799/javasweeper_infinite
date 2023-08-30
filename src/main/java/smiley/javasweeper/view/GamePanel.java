@@ -1,10 +1,10 @@
-package smiley.javasweeper.view.screens;
+package smiley.javasweeper.view;
 
 import java.awt.*;
 import javax.swing.*;
-import smiley.javasweeper.controllers.KeyHandler;
-import smiley.javasweeper.controllers.MouseHandler;
-import smiley.javasweeper.controllers.MouseMotionHandler;
+import smiley.javasweeper.controllers.keyboard.KeyHandler;
+import smiley.javasweeper.controllers.mouse.MouseButtonsOld;
+import smiley.javasweeper.controllers.mouse.MouseMotionHandlerOld;
 import smiley.javasweeper.controllers.UIHandler;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.model.Board;
@@ -31,8 +31,8 @@ public class GamePanel {
     }
   };
   private Thread gameThread;
-  public final MouseHandler mouseH;
-  public final MouseMotionHandler mouseMotionH;
+  public final MouseButtonsOld mouseH;
+  public final MouseMotionHandlerOld mouseMotionH;
   public final KeyHandler keyH;
   public final StateHandler stateH;
   public final UIHandler uiH;
@@ -47,8 +47,8 @@ public class GamePanel {
   public GamePanel(JFrame window) {
     this.window = window;
 
-    mouseH = new MouseHandler(this);
-    mouseMotionH = new MouseMotionHandler(this);
+    mouseH = new MouseButtonsOld(this);
+    mouseMotionH = new MouseMotionHandlerOld(this);
     keyH = new KeyHandler(this);
     stateH = new StateHandler();
     uiH = new UIHandler(this);

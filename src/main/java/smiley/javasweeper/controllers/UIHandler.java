@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Objects;
-import smiley.javasweeper.view.screens.GamePanel;
+import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.components.MenuWindow;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.view.components.Slider;
@@ -191,13 +191,13 @@ public class UIHandler {
    * @param centerY If the window should be centered vertically
    */
   public void centerSubWindow(MenuWindow window, boolean centerX, boolean centerY) {
-    int newX = window.boundingRect.x;
-    int newY = window.boundingRect.y;
+    int newX = window.getBoundingRect().x;
+    int newY = window.getBoundingRect().y;
     if (centerX) {
-      newX = getCenterX(window.boundingRect.width);
+      newX = getCenterX(window.getBoundingRect().width);
     }
     if (centerY) {
-      newY = getCenterY((window.boundingRect.height));
+      newY = getCenterY((window.getBoundingRect().height));
     }
     window.moveTo(newX, newY);
   }

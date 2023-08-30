@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.components.MenuWindow;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.view.components.Slider;

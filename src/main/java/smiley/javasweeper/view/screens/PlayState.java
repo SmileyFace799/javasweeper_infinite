@@ -9,10 +9,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
+import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.StateHandler;
 import smiley.javasweeper.model.Board;
-import smiley.javasweeper.controllers.KeyHandler;
-import smiley.javasweeper.controllers.MouseHandler;
+import smiley.javasweeper.controllers.keyboard.KeyHandler;
+import smiley.javasweeper.controllers.mouse.MouseButtonsOld;
 import smiley.javasweeper.controllers.UIHandler;
 
 /**
@@ -22,7 +23,7 @@ import smiley.javasweeper.controllers.UIHandler;
  */
 public class PlayState implements State {
   private final GamePanel gp;
-  private final MouseHandler mouseH;
+  private final MouseButtonsOld mouseH;
   private final KeyHandler keyH;
   private final StateHandler stateH;
   private final UIHandler uiH;
@@ -59,19 +60,19 @@ public class PlayState implements State {
       }
     }
 
-    if (Boolean.TRUE.equals(mouseH.clicked.get(MouseHandler.LMB))) {
-      if (!board.exists(clickedBoardPoints.get(MouseHandler.LMB))) {
-        board.generate(clickedBoardPoints.get(MouseHandler.LMB));
+    if (Boolean.TRUE.equals(mouseH.clicked.get(MouseButtonsOld.LMB))) {
+      if (!board.exists(clickedBoardPoints.get(MouseButtonsOld.LMB))) {
+        board.generate(clickedBoardPoints.get(MouseButtonsOld.LMB));
       }
-      board.reveal(clickedBoardPoints.get(MouseHandler.LMB));
+      board.reveal(clickedBoardPoints.get(MouseButtonsOld.LMB));
     }
-    if (Boolean.TRUE.equals(mouseH.clicked.get(MouseHandler.RMB)) && board.exists(clickedBoardPoints.get(MouseHandler.RMB))) {
-      Square clickedSquare = board.get(clickedBoardPoints.get(MouseHandler.RMB));
+    if (Boolean.TRUE.equals(mouseH.clicked.get(MouseButtonsOld.RMB)) && board.exists(clickedBoardPoints.get(MouseButtonsOld.RMB))) {
+      Square clickedSquare = board.get(clickedBoardPoints.get(MouseButtonsOld.RMB));
       if (!clickedSquare.isRevealed()) {
         board.flag(clickedSquare);
       }
-    } else if (Boolean.TRUE.equals(mouseH.clicked.get(MouseHandler.WHEEL))) {
-      Point pos = clickedBoardPoints.get(MouseHandler.WHEEL); //pos: Location clicked by the mouse-wheel
+    } else if (Boolean.TRUE.equals(mouseH.clicked.get(MouseButtonsOld.WHEEL))) {
+      Point pos = clickedBoardPoints.get(MouseButtonsOld.WHEEL); //pos: Location clicked by the mouse-wheel
       Square clickedSquare = board.get(pos);
       if (
           board.exists(pos)
@@ -167,11 +168,11 @@ public class PlayState implements State {
 
   @Override
   public void mouseDragged(MouseEvent e) {
-    if (Boolean.TRUE.equals(mouseH.pressed.get(MouseHandler.WHEEL))
-        && System.nanoTime() > mouseH.pressTime.get(MouseHandler.WHEEL) + (long) (0.15 * 1e9)
+    if (Boolean.TRUE.equals(mouseH.pressed.get(MouseButtonsOld.WHEEL))
+        && System.nanoTime() > mouseH.pressTime.get(MouseButtonsOld.WHEEL) + (long) (0.15 * 1e9)
     ) {
       Point cameraOffset = new Point(gp.getStartDragCamera());
-      Point startDragPos = mouseH.pressPos.get(MouseHandler.WHEEL);
+      Point startDragPos = mouseH.pressPos.get(MouseButtonsOld.WHEEL);
       Point pos = uiH.scalePointToDisplay(e.getPoint());
       cameraOffset.x += startDragPos.x - pos.x;
       cameraOffset.y += startDragPos.y - pos.y;

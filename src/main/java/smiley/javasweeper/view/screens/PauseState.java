@@ -5,8 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.components.MenuWindow;
-import smiley.javasweeper.controllers.MouseHandler;
+import smiley.javasweeper.controllers.mouse.MouseButtonsOld;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.controllers.UIHandler;
 
@@ -39,7 +40,7 @@ public class PauseState implements State {
     if (gp.keyH.getEscTapped()) {
       gp.stateH.setActive(GameState.STATE_GAME);
     }
-    if (Boolean.TRUE.equals(gp.mouseH.clicked.get(MouseHandler.LMB)) && hoveringLowerMenu) {
+    if (Boolean.TRUE.equals(gp.mouseH.clicked.get(MouseButtonsOld.LMB)) && hoveringLowerMenu) {
       switch (hoveredIndex) {
         case 0 -> gp.stateH.setActive(GameState.STATE_GAME);
         case 3 -> gp.stateH.setActive(GameState.STATE_SETTINGS);

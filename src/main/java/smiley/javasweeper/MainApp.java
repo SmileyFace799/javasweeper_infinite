@@ -3,7 +3,7 @@ package smiley.javasweeper;
 import javax.swing.*;
 import java.awt.*;
 import smiley.javasweeper.filestorage.Settings;
-import smiley.javasweeper.view.screens.GamePanel;
+import smiley.javasweeper.view.GamePanel;
 
 public class MainApp {
   public static void main(String[] args) {
