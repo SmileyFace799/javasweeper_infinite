@@ -9,39 +9,54 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import smiley.javasweeper.controllers.UIHandler;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.squares.BombSquare;
 import smiley.javasweeper.squares.NumberSquare;
 import smiley.javasweeper.squares.Square;
-import smiley.javasweeper.view.GamePanel;
 
-public class Board {
+public class Board implements Iterable<Square> {
 
   public static final int ORIGINAL_TILE_SIZE = 16;
 
-  private final HashMap<Integer, HashMap<Integer, Square>> boardMap = new HashMap<>();
-  final double mineChance;
+  private final Map<Integer, Map<Integer, Square>> boardMap;
+  private final Dimensions dimensions;
+  private double mineChance;
   private BufferedImage image;
   private String associatedFilename;
 
-  private int minX;
-  private int minY;
-  private int maxX;
-  private int maxY;
+  public Board(Map<Integer, Map<Integer, Square>> boardMap) {
+    this.boardMap = boardMap;
 
-
-  public Board(GamePanel gp) { //Defaults to 0 mineChance
-    this(0, gp);
+    int minX = 0;
+    int minY = 0;
+    int maxX = 0;
+    int maxY = 0;
+    for (Square square : this) {
+      int squareX = square.getX();
+      int squareY = square.getY();
+      minX = Math.min(minX, squareX);
+      minY = Math.min(minY, squareY);
+      maxX = Math.max(maxX, squareX);
+      maxY = Math.max(maxY, squareY);
+    }
+    this.dimensions = new Dimensions(minX, minY, maxX, maxY);
   }
 
-  public Board(double mineChance, GamePanel gp) {
+  public Board() { //Defaults to 0 mineChance
+    this(0);
+  }
+
+  public Board(double mineChance) {
+    this.boardMap = new HashMap<>();
+    this.dimensions = new Dimensions();
     this.mineChance = mineChance;
   }
 
   //Accessors
-  public Map<Integer, HashMap<Integer, Square>> getBoardMap() {
+  public Map<Integer, Map<Integer, Square>> getBoardMap() {
     return boardMap;
   }
 
@@ -49,12 +64,8 @@ public class Board {
     return (int) Math.round(ORIGINAL_TILE_SIZE * Settings.getBoardScale());
   }
 
-  public int getMinX() {
-    return minX;
-  }
-
-  public int getMinY() {
-    return minY;
+  public Dimensions getBoardDimensions() {
+    return dimensions;
   }
 
   public double getMineChance() {
@@ -91,15 +102,15 @@ public class Board {
   }
 
   public List<Square> getSquareList() {
-    ArrayList<Square> squareList = new ArrayList<>();
-    for (HashMap<Integer, Square> column : boardMap.values()) {
+    List<Square> squareList = new ArrayList<>();
+    for (Map<Integer, Square> column : boardMap.values()) {
       squareList.addAll(column.values());
     }
     return squareList;
   }
 
   public List<int[]> getAdjacentPoints(int x, int y) {
-    ArrayList<int[]> adjacentPoints = new ArrayList<>();
+    List<int[]> adjacentPoints = new ArrayList<>();
     for (int adjX = x - 1; adjX <= x + 1; adjX++) {
       for (int adjY = y - 1; adjY <= y + 1; adjY++) {
         if (x != adjX || y != adjY) {
@@ -130,10 +141,6 @@ public class Board {
   }
 
   public void put(int x, int y, Square square) {
-    put(x, y, square, true);
-  }
-
-  public void put(int x, int y, Square square, boolean updateImg) {
     if (!boardMap.containsKey(x)) {
       boardMap.put(x, new HashMap<>());
     }
@@ -143,9 +150,7 @@ public class Board {
     } else {
       System.out.println("put: A square already exists at x=" + x + " & y=" + y);
     }
-    if (updateImg) {
-      updateImage(square);
-    }
+    dimensions.expand(square.getX(), square.getY());
   }
   public void flag(int x, int y) {
     flag(get(x, y));
@@ -191,7 +196,7 @@ public class Board {
         bombSquare.setRevealedTrue();
       }
     }
-    updateImage(square);
+    dimensions.expand(square.getX(), square.getY());
   }
 
   public void massReveal(int x, int y) {
@@ -234,7 +239,7 @@ public class Board {
         (1 + (maxY - minY)) * tileSize
     );
     Graphics2D g2 = image.createGraphics();
-    for (Map.Entry<Integer, HashMap<Integer, Square>> column : boardMap.entrySet()) {
+    for (Map.Entry<Integer, Map<Integer, Square>> column : boardMap.entrySet()) {
       int x = column.getKey();
       for (int y : column.getValue().keySet()) {
         if (x < minX || x > maxX || y < minY || y > maxY) {
@@ -327,25 +332,6 @@ public class Board {
     return square;
   }
 
-  private void updateBoardBounds(int x, int y) {
-    if (boardMap.isEmpty()) {
-      minX = x;
-      minY = y;
-      maxX = x;
-      maxY = y;
-    } else {
-      if (x < minX) {
-        minX = x;
-      } else if (x > maxX) {
-        maxX = x;
-      }
-      if (y < minY) {
-        minY = y;
-      } else if (y > maxY) {
-        maxY = y;
-      }
-    }
-  }
 
   public void load(String filename) {
     associatedFilename = filename;
@@ -355,15 +341,14 @@ public class Board {
         Square square = makeNumberSquare(squareStr);
         int x = square.getX();
         int y = square.getY();
-        updateBoardBounds(x, y);
-        this.put(x, y, square, false);
+        this.put(x, y, square);
 
 
       }
       drawInitialImage();
     } catch (IOException e) {
       System.out.println(
-          "Could not load data from file: \"" + filename + "\". The file might not exist"
+              "Could not load data from file: \"" + filename + "\". The file might not exist"
       );
     }
   }
@@ -375,7 +360,7 @@ public class Board {
     }
     try (BufferedWriter bw = new BufferedWriter(new FileWriter(associatedFilename))) {
       StringBuilder boardStr = new StringBuilder();
-      for (HashMap<Integer, Square> xMap : boardMap.values()) {
+      for (Map<Integer, Square> xMap : boardMap.values()) {
         for (Square square : xMap.values()) {
           if (square instanceof NumberSquare) {
             boardStr.append("number");
@@ -402,6 +387,75 @@ public class Board {
       bw.write(boardStr.toString());
     } catch (IOException e) {
       e.printStackTrace();
+    }
+  }
+
+  @NotNull
+  @Override
+  public Iterator<Square> iterator() {
+    return new BoardIterator();
+  }
+
+  public static class Dimensions {
+    private int minX;
+    private int minY;
+    private int maxX;
+    private int maxY;
+
+    private Dimensions() {
+      this(0, 0, 0, 0);
+    }
+
+    public Dimensions(int minX, int minY, int maxX, int maxY) {
+      this.minX = minX;
+      this.minY = minY;
+      this.maxX = maxX;
+      this.maxY = maxY;
+    }
+
+    public int getMinX() {
+      return minX;
+    }
+
+    public int getMinY() {
+      return minY;
+    }
+
+    public int getMaxX() {
+      return maxX;
+    }
+
+    public int getMaxY() {
+      return maxY;
+    }
+
+    private void expand(int newX, int newY) {
+      this.minX = Math.min(minX, newX);
+      this.minY = Math.min(minY, newY);
+      this.maxX = Math.max(maxX, newX);
+      this.maxY = Math.max(maxY, newY);
+    }
+  }
+
+  private class BoardIterator implements Iterator<Square> {
+    private final List<Square> squares;
+
+    public BoardIterator() {
+      this.squares = boardMap
+              .values()
+              .stream()
+              .flatMap(column -> column.values().stream())
+              .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasNext() {
+      return !squares.isEmpty();
+    }
+
+    @Override
+    public Square next() {
+      return squares.remove(0);
     }
   }
 }
