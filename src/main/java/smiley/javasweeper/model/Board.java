@@ -2,13 +2,17 @@ package smiley.javasweeper.model;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import smiley.javasweeper.controllers.UIHandler;
@@ -23,36 +27,18 @@ public class Board implements Iterable<Square> {
 
   private final Map<Integer, Map<Integer, Square>> boardMap;
   private final Dimensions dimensions;
-  private double mineChance;
-  private BufferedImage image;
-  private String associatedFilename;
+  private final double mineChance;
+  private final String filename;
 
-  public Board(Map<Integer, Map<Integer, Square>> boardMap) {
-    this.boardMap = boardMap;
-
-    int minX = 0;
-    int minY = 0;
-    int maxX = 0;
-    int maxY = 0;
-    for (Square square : this) {
-      int squareX = square.getX();
-      int squareY = square.getY();
-      minX = Math.min(minX, squareX);
-      minY = Math.min(minY, squareY);
-      maxX = Math.max(maxX, squareX);
-      maxY = Math.max(maxY, squareY);
-    }
-    this.dimensions = new Dimensions(minX, minY, maxX, maxY);
+  public Board() {
+    this("");
   }
 
-  public Board() { //Defaults to 0 mineChance
-    this(0);
-  }
-
-  public Board(double mineChance) {
+  public Board(String filename) {
     this.boardMap = new HashMap<>();
     this.dimensions = new Dimensions();
-    this.mineChance = mineChance;
+    this.filename = filename;
+    this.mineChance = Settings.getMineChance();
   }
 
   //Accessors
@@ -64,16 +50,12 @@ public class Board implements Iterable<Square> {
     return (int) Math.round(ORIGINAL_TILE_SIZE * Settings.getBoardScale());
   }
 
-  public Dimensions getBoardDimensions() {
+  public Dimensions getDimensions() {
     return dimensions;
   }
 
-  public double getMineChance() {
-    return mineChance;
-  }
-
-  public BufferedImage getImage() {
-    return image;
+  public String getFilename() {
+    return filename;
   }
 
   public boolean exists(@NotNull Point pos) {
@@ -334,7 +316,7 @@ public class Board implements Iterable<Square> {
 
 
   public void load(String filename) {
-    associatedFilename = filename;
+    this.filename = filename;
     try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
       String boardStr = br.readLine();
       for (String squareStr : boardStr.split("\\|")) {
@@ -354,11 +336,11 @@ public class Board implements Iterable<Square> {
   }
 
   public void save() {
-    if (associatedFilename == null) {
+    if (filename == null) {
       System.out.println("No filename is associated with this board");
       return;
     }
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(associatedFilename))) {
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
       StringBuilder boardStr = new StringBuilder();
       for (Map<Integer, Square> xMap : boardMap.values()) {
         for (Square square : xMap.values()) {

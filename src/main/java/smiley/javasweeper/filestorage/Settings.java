@@ -1,40 +1,70 @@
 package smiley.javasweeper.filestorage;
 
+import java.io.IOException;
+
 public class Settings {
-  private static final JsonMap<Object> json = new JsonMap<>("src/main/resources/settings.json");
+  private static Settings instance;
+
+  private boolean loaded;
+  private JsonMap<Object> json;
 
   //Constructor
   private Settings() {
-    throw new IllegalStateException("Utility class");
+    this.loaded = false;
+  }
+
+  public static synchronized Settings getInstance() {
+    if (instance == null) {
+      instance = new Settings();
+    }
+    return instance;
+  }
+
+  public void load() throws IOException {
+    this.json = new JsonMap<>("settings.json");
+    this.loaded = true;
+  }
+
+  private void verifyLoaded() throws IllegalStateException {
+    if (!loaded) {
+      throw new IllegalStateException("Settings not loaded");
+    }
   }
 
   //Accessors
-  public static int getDisplayWidth() {
+  public int getDisplayWidth() {
+    verifyLoaded();
     return (int) json.get("displayWidth");
   }
 
-  public static int getDisplayHeight() {
+  public int getDisplayHeight() {
+    verifyLoaded();
     return (int) json.get("displayHeight");
   }
 
-  public static double getMineChance() {
+  public double getMineChance() {
+    verifyLoaded();
     return (double) json.get("mineChance");
   }
 
-  public static double getBoardScale() {
+  public double getBoardScale() {
+    verifyLoaded();
     return (double) json.get("boardScale");
   }
 
-  public static double getUiScale() {
+  public double getUiScale() {
+    verifyLoaded();
     return (double) json.get("uiScale");
   }
 
-  public static boolean isFullscreen() {
+  public boolean isFullscreen() {
+    verifyLoaded();
     return (boolean) json.get("fullscreen");
   }
 
   //Mutators
-  public static void setDisplayWidth(int width) {
+  public void setDisplayWidth(int width) {
+    verifyLoaded();
     if (width >= 0) {
       json.put("displayWidth", width);
       json.save();
@@ -43,7 +73,8 @@ public class Settings {
     }
   }
 
-  public static void setDisplayHeight(int height) {
+  public void setDisplayHeight(int height) {
+    verifyLoaded();
     if (height >= 0) {
       json.put("displayHeight", height);
       json.save();
@@ -52,7 +83,8 @@ public class Settings {
     }
   }
 
-  public static void setMineChance(double mineChance) {
+  public void setMineChance(double mineChance) {
+    verifyLoaded();
     if (mineChance >= 0 && mineChance <= 100) {
       json.put("mineChance", mineChance);
       json.save();
@@ -61,7 +93,8 @@ public class Settings {
     }
   }
 
-  public static void setBoardScale(double boardScale) {
+  public void setBoardScale(double boardScale) {
+    verifyLoaded();
     if (boardScale > 0) {
       json.put("boardScale", boardScale);
       json.save();
@@ -70,7 +103,8 @@ public class Settings {
     }
   }
 
-  public static void setUiScale(double uiScale) {
+  public void setUiScale(double uiScale) {
+    verifyLoaded();
     if (uiScale > 0) {
       json.put("uiScale", uiScale);
       json.save();
@@ -79,7 +113,8 @@ public class Settings {
     }
   }
 
-  public static void toggleFullscreen() {
+  public void toggleFullscreen() {
+    verifyLoaded();
     json.put("fullscreen", !isFullscreen());
     json.save();
   }

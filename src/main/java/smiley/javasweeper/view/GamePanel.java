@@ -1,17 +1,23 @@
 package smiley.javasweeper.view;
 
 import java.awt.*;
+import java.util.Arrays;
 import javax.swing.*;
 import smiley.javasweeper.controllers.keyboard.KeyHandler;
+import smiley.javasweeper.controllers.keyboard.Keyboard;
+import smiley.javasweeper.controllers.mouse.Mouse;
 import smiley.javasweeper.controllers.mouse.MouseButtonsOld;
 import smiley.javasweeper.controllers.mouse.MouseMotionHandlerOld;
 import smiley.javasweeper.controllers.UIHandler;
 import smiley.javasweeper.filestorage.Settings;
+import smiley.javasweeper.intermediary.ModelManager;
 import smiley.javasweeper.model.Board;
 import smiley.javasweeper.view.StateHandler;
 import smiley.javasweeper.view.screens.GameState;
+import smiley.javasweeper.view.screens.GameplayScreen;
 import smiley.javasweeper.view.screens.PauseState;
 import smiley.javasweeper.view.screens.PlayState;
+import smiley.javasweeper.view.screens.ScreenHandler;
 import smiley.javasweeper.view.screens.SettingsState;
 
 public class GamePanel {
@@ -31,14 +37,8 @@ public class GamePanel {
     }
   };
   private Thread gameThread;
-  public final MouseButtonsOld mouseH;
-  public final MouseMotionHandlerOld mouseMotionH;
-  public final KeyHandler keyH;
-  public final StateHandler stateH;
   public final UIHandler uiH;
 
-  //VARIABLES
-  private final Board board;
   private Point cameraOffset;
   private Point startDragCamera;
   private boolean debugEnabled = false;
@@ -47,10 +47,6 @@ public class GamePanel {
   public GamePanel(JFrame window) {
     this.window = window;
 
-    mouseH = new MouseButtonsOld(this);
-    mouseMotionH = new MouseMotionHandlerOld(this);
-    keyH = new KeyHandler(this);
-    stateH = new StateHandler();
     uiH = new UIHandler(this);
 
 
@@ -58,17 +54,12 @@ public class GamePanel {
     jPanel.setDoubleBuffered(true);
     jPanel.setFocusable(true);
     jPanel.setBackground(Color.black);
-    jPanel.addMouseListener(mouseH);
-    jPanel.addMouseMotionListener(mouseMotionH);
-    jPanel.addKeyListener(keyH);
+    Arrays.stream(Mouse.Buttons.values()).forEach(jPanel::addMouseListener);
+    jPanel.addMouseMotionListener(Mouse.getInstance());
+    jPanel.addKeyListener(Keyboard.getInstance());
 
-    stateH.addState(GameState.STATE_GAME, new PlayState(this));
-    stateH.addState(GameState.STATE_PAUSED, new PauseState(this));
-    stateH.addState(GameState.STATE_SETTINGS, new SettingsState(this));
-    stateH.setActive(GameState.STATE_GAME);
-
-    board = new Board(Settings.getMineChance(), this);
-    board.load("src/main/resources/boards/testboard.board");
+    ScreenHandler.getInstance().makeScreens(this);
+    ScreenHandler.getInstance().changeScreen(GameplayScreen.class);
 
     if (!board.exists(0, 0)) {
       board.generate(0, 0, 0);
@@ -84,10 +75,6 @@ public class GamePanel {
 
   public JPanel getJPanel() {
     return jPanel;
-  }
-
-  public Board getBoard() {
-    return board;
   }
 
   public Point getCameraOffset() {
@@ -141,6 +128,7 @@ public class GamePanel {
     });
     gameThread.start();
     uiH.setupScreen();
+    ModelManager.getInstance().appStarted();
   }
 
   public void update() {

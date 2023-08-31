@@ -2,8 +2,10 @@ package smiley.javasweeper.intermediary;
 
 import java.util.ArrayList;
 import java.util.List;
+import smiley.javasweeper.intermediary.events.AppStartedEvent;
 import smiley.javasweeper.intermediary.events.BoardLoadedEvent;
 import smiley.javasweeper.intermediary.events.ModelEvent;
+import smiley.javasweeper.intermediary.events.SettingsLoadedEvent;
 import smiley.javasweeper.model.Board;
 
 public class ModelManager {
@@ -24,6 +26,14 @@ public class ModelManager {
 
     private void notifyListeners(ModelEvent me) {
         listeners.forEach(listener -> listener.onEvent(me));
+    }
+
+    public void appStarted() {
+        notifyListeners(new AppStartedEvent());
+    }
+
+    public void loadSettings() {
+        notifyListeners(new SettingsLoadedEvent());
     }
 
     public void setBoard(Board board) {

@@ -240,22 +240,9 @@ public class UIHandler {
     return new Slider(x, y, width, height, defaultValue, Settings.getUiScale());
   }
 
-  /**
-   * Takes a graphics object and draws a horizontally centered string at a specified y-position
-   *
-   * @param g2  The graphics object to draw the string on
-   * @param str The string to draw
-   * @param y   The y-coordinate for the string's baseline
-   * @see #getCenterX(int)
-   * @see Graphics2D#drawString(String, int, int)
-   */
-  public void drawStringCentered(@NotNull Graphics2D g2, String str, int y) {
-    g2.drawString(str, (Settings.getDisplayWidth() - g2.getFontMetrics().stringWidth(str)) / 2, y);
-  }
 
-  public void drawStringRightAligned(@NotNull Graphics2D g2, String str, int rightX, int y) {
-    g2.drawString(str, rightX - g2.getFontMetrics().stringWidth(str), y);
-  }
+
+
 
   public void setupScreen() {
     if (Settings.isFullscreen()) {

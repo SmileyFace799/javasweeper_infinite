@@ -1,5 +1,9 @@
 package smiley.javasweeper.filestorage;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Objects;
 import smiley.javasweeper.model.Board;
 import smiley.javasweeper.squares.BombSquare;
@@ -40,6 +44,17 @@ public class BoardLoader {
             board.put(square.getX(), square.getY(), square);
         }
         return board;
+    }
+
+    public static Board loadBoard(String filename) throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            return makeBoard(br.readLine());
+        }
+    }
+
+    public static boolean boardExists(String filename) {
+        File f = new File(filename);
+        return f.exists() && !f.isDirectory();
     }
 
     public static String serializeBoard(Board board) {

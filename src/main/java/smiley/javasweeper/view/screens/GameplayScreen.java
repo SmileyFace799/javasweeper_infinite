@@ -6,6 +6,7 @@ import smiley.javasweeper.controllers.GameplayController;
 import smiley.javasweeper.controllers.UIHandler;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.intermediary.ModelEventListener;
+import smiley.javasweeper.intermediary.events.BoardLoadedEvent;
 import smiley.javasweeper.intermediary.events.ModelEvent;
 import smiley.javasweeper.model.Board;
 import smiley.javasweeper.squares.Square;
@@ -50,6 +51,11 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
      */
     public void drawInitialImage(Board board) {
         int tileSize = getTileSize();
+        this.boardDimensions = board.getDimensions();
+        int minX = boardDimensions.getMinX();
+        int minY = boardDimensions.getMinY();
+        int maxX = boardDimensions.getMaxX();
+        int maxY = boardDimensions.getMaxY();
         this.boardImage = UIHandler.makeFormattedImage(
                 (1 + (maxX - minX)) * tileSize,
                 (1 + (maxY - minY)) * tileSize
@@ -84,6 +90,8 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
 
     @Override
     public void onEvent(ModelEvent me) {
-
+        if (me instanceof BoardLoadedEvent ble) {
+            drawInitialImage(ble.board());
+        }
     }
 }

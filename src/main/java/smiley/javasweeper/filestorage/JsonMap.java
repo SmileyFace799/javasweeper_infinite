@@ -6,25 +6,28 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
 public class JsonMap<V> extends HashMap<String, V> {
   final transient ObjectMapper mapper = new ObjectMapper();
   final String fileName;
 
-  public JsonMap(String fileName) {
+  public JsonMap(String fileName) throws IOException {
     this.fileName = fileName;
     load();
   }
 
   //Mutators
-  public void load() {
+  public void load() throws IOException{
     try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
       this.putAll(mapper.readValue(br.readLine(), HashMap.class));
-    } catch (Exception e) {
-      System.out.println(
-          "Could not load data from file: \"" + fileName + "\". The file might not exist"
+    } catch (IOException ioe) {
+      Logger.getLogger(getClass().getName()).log(
+              Level.SEVERE, String.format("\"%s\" not found", fileName), ioe
       );
+      throw ioe;
     }
   }
 
