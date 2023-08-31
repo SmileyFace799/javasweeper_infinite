@@ -2,13 +2,13 @@ package smiley.javasweeper.controllers;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
 import smiley.javasweeper.controllers.keyboard.Keyboard;
 import smiley.javasweeper.controllers.mouse.Mouse;
 import smiley.javasweeper.controllers.mouse.MouseInteractionListener;
-import smiley.javasweeper.controllers.mouse.PressEvent;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.screens.GenericScreen;
-import smiley.javasweeper.view.screens.ScreenHandler;
+import smiley.javasweeper.view.screens.ScreenManager;
 
 public abstract class GenericController implements MouseInteractionListener, KeyListener {
     private final GamePanel app;
@@ -22,41 +22,58 @@ public abstract class GenericController implements MouseInteractionListener, Key
     public abstract GenericScreen getScreen();
 
     public void changeScreen(Class<? extends GenericScreen> screenClass) {
-        ScreenHandler.getInstance().changeScreen(screenClass);
+        ScreenManager.getInstance().changeScreen(screenClass);
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
+    public void keyTyped(KeyEvent ke) {
         //Do nothing by default
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {
+    public void keyPressed(KeyEvent ke) {
         //Do nothing by default
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {
+    public void keyReleased(KeyEvent ke) {
+        if (ke.getKeyCode() == KeyEvent.VK_F3) {
+            //TODO: Toggle debug
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent me) {
         //Do nothing by default
     }
 
     @Override
-    public void mouseClicked(PressEvent pe) {
+    public void mousePressed(MouseEvent me) {
         //Do nothing by default
     }
 
     @Override
-    public void mousePressed(PressEvent pe) {
+    public void mouseReleased(MouseEvent me) {
         //Do nothing by default
     }
 
     @Override
-    public void mouseReleased(PressEvent pe) {
+    public void mouseEntered(MouseEvent e) {
         //Do nothing by default
     }
 
     @Override
-    public void mouseMoved(int x, int y) {
+    public void mouseExited(MouseEvent e) {
+        //Do nothing by default
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        //Do nothing by default
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent me) {
         //Do nothing by default
     }
 }

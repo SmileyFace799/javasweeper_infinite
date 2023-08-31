@@ -3,22 +3,14 @@ package smiley.javasweeper.view;
 import java.awt.*;
 import java.util.Arrays;
 import javax.swing.*;
-import smiley.javasweeper.controllers.keyboard.KeyHandler;
 import smiley.javasweeper.controllers.keyboard.Keyboard;
 import smiley.javasweeper.controllers.mouse.Mouse;
-import smiley.javasweeper.controllers.mouse.MouseButtonsOld;
-import smiley.javasweeper.controllers.mouse.MouseMotionHandlerOld;
 import smiley.javasweeper.controllers.UIHandler;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.intermediary.ModelManager;
 import smiley.javasweeper.model.Board;
-import smiley.javasweeper.view.StateHandler;
-import smiley.javasweeper.view.screens.GameState;
 import smiley.javasweeper.view.screens.GameplayScreen;
-import smiley.javasweeper.view.screens.PauseState;
-import smiley.javasweeper.view.screens.PlayState;
-import smiley.javasweeper.view.screens.ScreenHandler;
-import smiley.javasweeper.view.screens.SettingsState;
+import smiley.javasweeper.view.screens.ScreenManager;
 
 public class GamePanel {
 
@@ -32,14 +24,13 @@ public class GamePanel {
       super.paintComponent(g);
 
       Graphics2D g2 = (Graphics2D) g;
-      uiH.drawScreen(g2, debugEnabled);
+      GraphicManager.getInstance().drawScreen(g2, debugEnabled);
       g2.dispose();
     }
   };
   private Thread gameThread;
   public final UIHandler uiH;
 
-  private Point cameraOffset;
   private Point startDragCamera;
   private boolean debugEnabled = false;
 
@@ -49,22 +40,17 @@ public class GamePanel {
 
     uiH = new UIHandler(this);
 
-
     jPanel.setPreferredSize(new Dimension(Settings.getDisplayWidth(), Settings.getDisplayHeight()));
     jPanel.setDoubleBuffered(true);
     jPanel.setFocusable(true);
     jPanel.setBackground(Color.black);
-    Arrays.stream(Mouse.Buttons.values()).forEach(jPanel::addMouseListener);
+    jPanel.addMouseListener(Mouse.getInstance());
     jPanel.addMouseMotionListener(Mouse.getInstance());
     jPanel.addKeyListener(Keyboard.getInstance());
 
-    ScreenHandler.getInstance().makeScreens(this);
-    ScreenHandler.getInstance().changeScreen(GameplayScreen.class);
+    ScreenManager.getInstance().makeScreens(this);
+    ScreenManager.getInstance().changeScreen(GameplayScreen.class);
 
-    if (!board.exists(0, 0)) {
-      board.generate(0, 0, 0);
-      board.reveal(0, 0, 0);
-    }
     cameraOffset = new Point(-(Settings.getDisplayWidth() - Board.getTileSize()) / 2, -(Settings.getDisplayHeight() - Board.getTileSize()) / 2);
   }
 
@@ -77,9 +63,6 @@ public class GamePanel {
     return jPanel;
   }
 
-  public Point getCameraOffset() {
-    return cameraOffset;
-  }
 
   public Point getStartDragCamera() {
     return startDragCamera;
@@ -90,10 +73,6 @@ public class GamePanel {
     window.dispose();
     window.setUndecorated(undecorated);
     window.setVisible(true);
-  }
-
-  public void setCameraOffset(Point pos) {
-    cameraOffset = pos;
   }
 
   public void setStartDragCamera(Point pos) {
@@ -120,7 +99,6 @@ public class GamePanel {
         lastTime = currentTime;
 
         if (delta >= 1) {
-          update();
           jPanel.repaint();
           delta--;
         }
@@ -129,13 +107,5 @@ public class GamePanel {
     gameThread.start();
     uiH.setupScreen();
     ModelManager.getInstance().appStarted();
-  }
-
-  public void update() {
-    stateH.getActive().update();
-
-
-    mouseH.frameUpdated();
-    keyH.frameUpdated();
   }
 }

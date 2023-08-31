@@ -64,7 +64,7 @@ public class StartupScreen extends GenericScreen implements ModelEventListener {
             }
         } else if (me instanceof BoardLoadedEvent) {
             this.statusString = "Game loaded";
-            ScreenHandler.getInstance().changeScreen(GameplayScreen.class);
+            ScreenManager.getInstance().changeScreen(GameplayScreen.class);
         }
     }
 }

@@ -71,12 +71,13 @@ public class Board implements Iterable<Square> {
   }
 
   public Square get(int x, int y) {
+    Square square;
     if (exists(x, y)) {
-      return boardMap.get(x).get(y);
+      square = boardMap.get(x).get(y);
     } else {
-      System.out.println("get: There is no square at x=" + x + " & y=" + y);
-      return null;
+      square = null;
     }
+    return square;
   }
 
   public boolean isBomb(int x, int y) {
@@ -182,13 +183,13 @@ public class Board implements Iterable<Square> {
   }
 
   public void massReveal(int x, int y) {
-    Board revealBoard = new Board(gp);
+    Board revealBoard = new Board();
     revealBoard.put(x, y, get(x, y));
     massReveal(revealBoard, 50);
   }
 
   private void massReveal(Board revealBoard, int recursionCount) {
-    Board nextRevealBoard = new Board(gp);
+    Board nextRevealBoard = new Board();
     for (Square square : revealBoard.getSquareList()) {
       NumberSquare revealSquare = (NumberSquare) square;
       reveal(revealSquare.getX(), revealSquare.getY(), mineChance, false);
@@ -388,7 +389,7 @@ public class Board implements Iterable<Square> {
       this(0, 0, 0, 0);
     }
 
-    public Dimensions(int minX, int minY, int maxX, int maxY) {
+    private Dimensions(int minX, int minY, int maxX, int maxY) {
       this.minX = minX;
       this.minY = minY;
       this.maxX = maxX;
@@ -411,11 +412,35 @@ public class Board implements Iterable<Square> {
       return maxY;
     }
 
-    private void expand(int newX, int newY) {
+    public void expand(int newX, int newY) {
       this.minX = Math.min(minX, newX);
       this.minY = Math.min(minY, newY);
       this.maxX = Math.max(maxX, newX);
       this.maxY = Math.max(maxY, newY);
+    }
+
+    public Dimensions copy() {
+      return new Dimensions(minX, minY, maxX, maxY);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      };
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      };
+      Dimensions dimensions = (Dimensions) o;
+      return minX == dimensions.minX
+              && minY == dimensions.minY
+              && maxX == dimensions.maxX
+              && maxY == dimensions.maxY;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(minX, minY, maxX, maxY);
     }
   }
 

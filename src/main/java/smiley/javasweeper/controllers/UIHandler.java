@@ -1,7 +1,5 @@
 package smiley.javasweeper.controllers;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -266,36 +264,5 @@ public class UIHandler {
   public void toggleFullscreen() {
     Settings.toggleFullscreen();
     setupScreen();
-  }
-
-  /**
-   * Makes an image that's formatted to the same format as the screen, making the drawing process way quicker.
-   *
-   * @param width  The width of the image in pixels
-   * @param height The height of the image in pixels
-   * @return The newly made image
-   */
-  public static BufferedImage makeFormattedImage(int width, int height) {
-    return GRAPHICS_CONFIG.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
-  }
-
-  public void drawScreen(Graphics2D g2, boolean debugEnabled) {
-    displayG2.setFont(font);
-    displayG2.setColor(Color.black);
-    displayG2.fillRect(0, 0, Settings.getDisplayWidth(), Settings.getDisplayHeight());
-    long drawStart = System.nanoTime();
-
-    gp.stateH.getActive().drawScreen(displayG2);
-    g2.drawImage(display, 0, 0, windowWidth, windowHeight, null);
-
-    if (debugEnabled) {
-      g2.setFont(defaultFont);
-      g2.setColor(Color.black);
-      g2.fillRect(0, 0, 275, 50);
-      g2.setColor(Color.white);
-      long drawTime = (System.nanoTime() - drawStart);
-      g2.drawString("Draw time: " + (drawTime / 1e6) + "ms", 10, 20);
-      g2.drawString("Effective FPS: " + (1e9 / drawTime), 10, 40);
-    }
   }
 }

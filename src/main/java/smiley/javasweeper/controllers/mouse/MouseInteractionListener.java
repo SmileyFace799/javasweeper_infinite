@@ -1,11 +1,6 @@
 package smiley.javasweeper.controllers.mouse;
 
-public interface MouseInteractionListener {
-    void mouseClicked(PressEvent pe);
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
-    void mousePressed(PressEvent pe);
-
-    void mouseReleased(PressEvent pe);
-
-    void mouseMoved(int x, int y);
-}
+public interface MouseInteractionListener extends MouseListener, MouseMotionListener {}

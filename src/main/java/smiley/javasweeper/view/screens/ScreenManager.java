@@ -3,21 +3,21 @@ package smiley.javasweeper.view.screens;
 import java.util.List;
 import smiley.javasweeper.view.GamePanel;
 
-public class ScreenHandler {
-    private static ScreenHandler instance;
+public class ScreenManager {
+    private static ScreenManager instance;
 
     private boolean screensMade;
     private List<GenericScreen> screens;
     private GenericScreen currentScreen;
 
-    private ScreenHandler() {
+    private ScreenManager() {
         this.screensMade = false;
     }
     // :)
 
-    public static synchronized ScreenHandler getInstance() {
+    public static synchronized ScreenManager getInstance() {
         if (instance == null) {
-            instance = new ScreenHandler();
+            instance = new ScreenManager();
         }
         return instance;
     }

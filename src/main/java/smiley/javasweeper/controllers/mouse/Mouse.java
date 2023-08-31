@@ -4,21 +4,30 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
-public class Mouse implements MouseMotionListener {
+public class Mouse implements MouseListener, MouseMotionListener {
     private static Mouse instance;
+
+    private static final Map<Integer, Double> CLICK_MERCY_TIME = Map.of(
+            MouseEvent.BUTTON1, 0.1,
+            MouseEvent.BUTTON2, 0.2,
+            MouseEvent.BUTTON3, 0.15
+    );
 
     private final List<MouseInteractionListener> listeners;
 
-    private int mouseX;
-    private int mouseY;
+    private final Map<Integer, Long> pressTimes;
 
     private Mouse() {
         this.listeners = new ArrayList<>();
-        this.mouseX = 0;
-        this.mouseY = 0;
+        pressTimes = new HashMap<>();
+        pressTimes.put(MouseEvent.BUTTON1, -1L);
+        pressTimes.put(MouseEvent.BUTTON2, -1L);
+        pressTimes.put(MouseEvent.BUTTON3, -1L);
     }
 
     /**
@@ -42,69 +51,45 @@ public class Mouse implements MouseMotionListener {
     }
 
     @Override
+    public void mouseClicked(MouseEvent me) {
+        notifyListeners(listener -> listener.mouseClicked(me));
+    }
+
+    @Override
+    public void mousePressed(MouseEvent me) {
+        pressTimes.put(me.getButton(), System.nanoTime());
+        notifyListeners(listener -> listener.mousePressed(me));
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent me) {
+        if (System.nanoTime()
+                < pressTimes.get(me.getButton())
+                + (CLICK_MERCY_TIME.get(me.getButton()) * 1e9)
+        ) {
+            mouseClicked(me);
+        }
+        notifyListeners(listener -> listener.mouseReleased(me));
+        pressTimes.put(me.getButton(), -1L);
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent me) {
+        notifyListeners(listener -> listener.mouseEntered(me));
+    }
+
+    @Override
+    public void mouseExited(MouseEvent me) {
+        notifyListeners(listener -> listener.mouseExited(me));
+    }
+
+    @Override
     public void mouseDragged(MouseEvent me) {
-        //Not implemented
+        notifyListeners(listeners -> listeners.mouseDragged(me));
     }
 
     @Override
     public void mouseMoved(MouseEvent me) {
-        this.mouseX = me.getX();
-        this.mouseY = me.getY();
-        notifyListeners(listener -> listener.mouseMoved(mouseX, mouseY));
-    }
-
-    public enum Buttons implements MouseListener {
-        LMB(MouseEvent.BUTTON1, 0.1),
-        WHEEL(MouseEvent.BUTTON2, 0.2),
-        RMB(MouseEvent.BUTTON3, 0.15);
-
-        private final int buttonInt;
-        private final long clickMercyTime;
-        private PressEvent pressed;
-
-        Buttons(int buttonInt, double clickMercyTime) {
-            this.buttonInt = buttonInt;
-            this.clickMercyTime = (long) (clickMercyTime * 1e9);
-            this.pressed = null;
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent me) {
-            if (me.getButton() != buttonInt) {
-                return;
-            }
-            getInstance().notifyListeners(listener -> listener.mouseClicked(pressed));
-        }
-
-        @Override
-        public void mousePressed(MouseEvent me) {
-            if (me.getButton() != buttonInt) {
-                return;
-            }
-            this.pressed = new PressEvent(me.getX(), me.getY(), System.nanoTime());
-            getInstance().notifyListeners(listener -> listener.mousePressed(pressed));
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent me) {
-            if (me.getButton() != buttonInt) {
-                return;
-            }
-            if (System.nanoTime() < pressed.time() + clickMercyTime) {
-                mouseClicked(me);
-            }
-            getInstance().notifyListeners(listener -> listener.mouseReleased(pressed));
-            this.pressed = null;
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent me) {
-            //NOt implemented
-        }
-
-        @Override
-        public void mouseExited(MouseEvent me) {
-            //Not implemented
-        }
+        notifyListeners(listener -> listener.mouseMoved(me));
     }
 }

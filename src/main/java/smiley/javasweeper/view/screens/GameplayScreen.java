@@ -8,9 +8,11 @@ import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.intermediary.ModelEventListener;
 import smiley.javasweeper.intermediary.events.BoardLoadedEvent;
 import smiley.javasweeper.intermediary.events.ModelEvent;
+import smiley.javasweeper.intermediary.events.SquareUpdatedEvent;
 import smiley.javasweeper.model.Board;
 import smiley.javasweeper.squares.Square;
 import smiley.javasweeper.view.GamePanel;
+import smiley.javasweeper.view.GraphicManager;
 
 public class GameplayScreen extends GenericScreen implements ModelEventListener {
     private static final int ORIGINAL_TILE_SIZE = 16;
@@ -22,14 +24,15 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
     private int cameraOffsetX;
     private int cameraOffsetY;
     private Board.Dimensions boardDimensions;
+    private Board.Dimensions imageDimensions;
 
     protected GameplayScreen(GamePanel app) {
         super();
         this.controller = new GameplayController(this, app);
     }
 
-    private static int getTileSize() {
-        return (int) Math.round(ORIGINAL_TILE_SIZE * Settings.getBoardScale());
+    public static int getTileSize() {
+        return (int) Math.round(ORIGINAL_TILE_SIZE * Settings.getInstance().getBoardScale());
     }
 
     public int getCameraOffsetX() {
@@ -49,14 +52,15 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
      * Draws the initial board image.
      * Squares outside minX, minY, maxX & maxY will be out of bounds & not drawn
      */
-    public void drawInitialImage(Board board) {
+    private void drawInitialImage(Board board) {
         int tileSize = getTileSize();
         this.boardDimensions = board.getDimensions();
+        this.imageDimensions = boardDimensions.copy();
         int minX = boardDimensions.getMinX();
         int minY = boardDimensions.getMinY();
         int maxX = boardDimensions.getMaxX();
         int maxY = boardDimensions.getMaxY();
-        this.boardImage = UIHandler.makeFormattedImage(
+        this.boardImage = GraphicManager.makeFormattedImage(
                 (1 + (maxX - minX)) * tileSize,
                 (1 + (maxY - minY)) * tileSize
         );
@@ -72,6 +76,39 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
             }
         }
         boardG2.dispose();
+    }
+
+    public void updateImage(Square square) {
+        int x = square.getX();
+        int y = square.getY();
+        int tileSize = getTileSize();
+
+        if (!boardDimensions.equals(imageDimensions)) {
+            BufferedImage newImage = GraphicManager.makeFormattedImage(
+                    (1 + boardDimensions.getMaxX() - boardDimensions.getMinX()) * tileSize,
+                    (1 + boardDimensions.getMaxY() - boardDimensions.getMinY()) * tileSize
+            );
+            Graphics2D newG2 = newImage.createGraphics();
+
+            if (x < imageDimensions.getMinX()) {
+                newG2.drawImage(boardImage, (imageDimensions.getMinX() - x) * tileSize, 0, null);
+            }
+            if (y < imageDimensions.getMinY()) {
+                newG2.drawImage(boardImage, 0, (imageDimensions.getMinY() - y) * tileSize, null);
+            }
+            if (x > imageDimensions.getMaxX() || y > imageDimensions.getMaxY()) {
+                newG2.drawImage(boardImage, 0, 0, null);
+            }
+            newG2.dispose();
+            boardImage = newImage;
+            imageDimensions.expand(x, y);
+        }
+        boardG2.drawImage(
+                square.getTx(),
+                (x - boardDimensions.getMinX()) * tileSize,
+                (y - boardDimensions.getMinY()) * tileSize,
+                null
+        );
     }
 
     @Override
@@ -92,6 +129,8 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
     public void onEvent(ModelEvent me) {
         if (me instanceof BoardLoadedEvent ble) {
             drawInitialImage(ble.board());
+        } else if (me instanceof SquareUpdatedEvent sue) {
+
         }
     }
 }
