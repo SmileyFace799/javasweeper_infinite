@@ -1,7 +1,7 @@
-package smiley.javasweeper.squares;
+package smiley.javasweeper.model.squares;
 
-import smiley.javasweeper.model.Board;
 import smiley.javasweeper.textures.TxMap;
+import smiley.javasweeper.view.screens.GameplayScreen;
 
 public class BombSquare extends Square {
 
@@ -12,7 +12,7 @@ public class BombSquare extends Square {
   @Override
   public void setRevealedTrue() {
     if (!this.isRevealed() && !this.isFlagged()) {
-      this.setTx(TxMap.getScaled(Board.getTileSize(), "bombDetonated"));
+      this.setTx(TxMap.getScaled(GameplayScreen.getTileSize(), "squares/bombDetonated.bmp"));
       super.setRevealedTrue();
     }
   }

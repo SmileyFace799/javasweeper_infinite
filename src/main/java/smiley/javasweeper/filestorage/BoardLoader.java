@@ -1,14 +1,16 @@
 package smiley.javasweeper.filestorage;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
 import smiley.javasweeper.model.Board;
-import smiley.javasweeper.squares.BombSquare;
-import smiley.javasweeper.squares.NumberSquare;
-import smiley.javasweeper.squares.Square;
+import smiley.javasweeper.model.squares.BombSquare;
+import smiley.javasweeper.model.squares.NumberSquare;
+import smiley.javasweeper.model.squares.Square;
 
 public class BoardLoader {
     private BoardLoader() {
@@ -37,8 +39,8 @@ public class BoardLoader {
         return square;
     }
 
-    public static Board makeBoard(String boardString) {
-        Board board = new Board();
+    public static Board makeBoard(String boardString, String filename) {
+        Board board = new Board(filename);
         for (String squareString : boardString.split("\\|")) {
             Square square = makeNumberSquare(squareString);
             board.put(square.getX(), square.getY(), square);
@@ -48,7 +50,7 @@ public class BoardLoader {
 
     public static Board loadBoard(String filename) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            return makeBoard(br.readLine());
+            return makeBoard(br.readLine(), filename);
         }
     }
 
@@ -57,7 +59,7 @@ public class BoardLoader {
         return f.exists() && !f.isDirectory();
     }
 
-    public static String serializeBoard(Board board) {
+    private static String serializeBoard(Board board) {
         StringBuilder boardStr = new StringBuilder();
         for (Square square : board) {
             if (square instanceof NumberSquare) {
@@ -81,5 +83,16 @@ public class BoardLoader {
         }
         boardStr.deleteCharAt(boardStr.length() - 1);
         return boardStr.toString();
+    }
+
+    public static void saveBoard(Board board) throws IOException {
+        String filename = board.getFilename();
+        if (filename == null || filename.isBlank()) {
+            throw new IllegalArgumentException("Board \"board\" has no filename");
+        }
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+            bw.write(serializeBoard(board));
+        }
     }
 }

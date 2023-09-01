@@ -38,6 +38,7 @@ public class ScreenManager {
         }
 
         screens = List.of(
+                new StartupScreen(app),
                 new GameplayScreen(app)
         );
         this.screensMade = true;

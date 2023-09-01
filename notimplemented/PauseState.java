@@ -1,4 +1,4 @@
-package smiley.javasweeper.view.screens;
+package smiley.notimplemented;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -7,9 +7,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.components.MenuWindow;
-import smiley.javasweeper.controllers.mouse.MouseButtonsOld;
 import smiley.javasweeper.filestorage.Settings;
-import smiley.javasweeper.controllers.UIHandler;
+import smiley.javasweeper.view.screens.GameState;
+import smiley.javasweeper.view.screens.State;
 
 public class PauseState implements State {
   private final GamePanel gp;

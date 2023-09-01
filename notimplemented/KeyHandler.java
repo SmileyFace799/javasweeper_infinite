@@ -1,4 +1,4 @@
-package smiley.javasweeper.controllers.keyboard;
+package smiley.notimplemented;
 
 import org.jetbrains.annotations.NotNull;
 

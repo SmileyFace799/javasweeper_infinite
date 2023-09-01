@@ -17,12 +17,12 @@ public class DrawUtil {
      * @param y   The y-coordinate for the string's baseline
      */
     public static void drawStringCenteredX(@NotNull Graphics2D g2, String str, int y) {
-        g2.drawString(str, (Settings.getDisplayWidth() - g2.getFontMetrics().stringWidth(str)) / 2, y);
+        g2.drawString(str, (Settings.getInstance().getDisplayWidth() - g2.getFontMetrics().stringWidth(str)) / 2, y);
     }
 
     public static void drawStringCentered(@NotNull Graphics2D g2, String str) {
         drawStringCenteredX(g2, str,
-                (Settings.getDisplayHeight() - g2.getFontMetrics().getHeight()) / 2
+                (Settings.getInstance().getDisplayHeight() - g2.getFontMetrics().getHeight()) / 2
         );
     }
 

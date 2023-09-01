@@ -1,4 +1,4 @@
-package smiley.javasweeper.controllers;
+package smiley.notimplemented;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

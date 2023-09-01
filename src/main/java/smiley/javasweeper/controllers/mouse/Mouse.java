@@ -52,7 +52,7 @@ public class Mouse implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseClicked(MouseEvent me) {
-        notifyListeners(listener -> listener.mouseClicked(me));
+        //Do nothing
     }
 
     @Override
@@ -67,7 +67,7 @@ public class Mouse implements MouseListener, MouseMotionListener {
                 < pressTimes.get(me.getButton())
                 + (CLICK_MERCY_TIME.get(me.getButton()) * 1e9)
         ) {
-            mouseClicked(me);
+            notifyListeners(listener -> listener.mouseClicked(me));
         }
         notifyListeners(listener -> listener.mouseReleased(me));
         pressTimes.put(me.getButton(), -1L);

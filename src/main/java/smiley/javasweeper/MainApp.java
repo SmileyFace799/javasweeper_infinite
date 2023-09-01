@@ -2,8 +2,8 @@ package smiley.javasweeper;
 
 import javax.swing.*;
 import java.awt.*;
-import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.view.GamePanel;
+import smiley.javasweeper.view.GraphicManager;
 
 public class MainApp {
   public static void main(String[] args) {
@@ -17,7 +17,7 @@ public class MainApp {
     window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     window.setResizable(false);
     window.setTitle("Javasweeper Infinite");
-    window.setSize(new Dimension(Settings.getDisplayWidth(), Settings.getDisplayHeight()));
+    window.setSize(new Dimension(GraphicManager.DEFAULT_WINDOW_WIDTH, GraphicManager.DEFAULT_WINDOW_HEIGHT));
 
     window.setLocationRelativeTo(null);
     window.setUndecorated(false);

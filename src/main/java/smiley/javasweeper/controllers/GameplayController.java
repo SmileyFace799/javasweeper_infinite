@@ -7,9 +7,17 @@ import smiley.javasweeper.view.screens.GameplayScreen;
 
 public class GameplayController extends GenericController {
     private final GameplayScreen screen;
+
+    private boolean isCameraBeingMoved;
+    private int cameraMoveReferenceX;
+    private int cameraMoveReferenceY;
+
     public GameplayController(GameplayScreen screen, GamePanel app) {
         super(app);
         this.screen = screen;
+        this.isCameraBeingMoved = false;
+        this.cameraMoveReferenceX = 0;
+        this.cameraMoveReferenceY = 0;
     }
 
     @Override
@@ -39,6 +47,38 @@ public class GameplayController extends GenericController {
             default -> {
                 //Do nothing
             }
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent me) {
+        if (me.getButton() == MouseEvent.BUTTON2) {
+            this.isCameraBeingMoved = true;
+            this.cameraMoveReferenceX = me.getX();
+            this.cameraMoveReferenceY = me.getY();
+        }
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent me) {
+        if (me.getButton() == MouseEvent.BUTTON2) {
+            this.isCameraBeingMoved = false;
+            this.cameraMoveReferenceX = 0;
+            this.cameraMoveReferenceY = 0;
+        }
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent me) {
+        if (isCameraBeingMoved) {
+            int cameraMoveDx = me.getX() - cameraMoveReferenceX;
+            int cameraMoveDy = me.getY() - cameraMoveReferenceY;
+            getScreen().setCameraOffset(
+                    getScreen().getCameraOffsetX() + cameraMoveDx,
+                    getScreen().getCameraOffsetY() + cameraMoveDy
+            );
+            this.cameraMoveReferenceX = getScreen().getCameraOffsetX();
+            this.cameraMoveReferenceY = getScreen().getCameraOffsetX();
         }
     }
 }

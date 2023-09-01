@@ -1,4 +1,4 @@
-package smiley.javasweeper.controllers.mouse;
+package smiley.notimplemented;
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;

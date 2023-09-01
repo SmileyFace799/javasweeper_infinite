@@ -10,24 +10,23 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
-public class JsonMap<V> extends HashMap<String, V> {
+public class JsonMap extends MultiTypeMap<String> {
   final transient ObjectMapper mapper = new ObjectMapper();
   final String fileName;
 
-  public JsonMap(String fileName) throws IOException {
+  public JsonMap(String fileName) {
     this.fileName = fileName;
     load();
   }
 
   //Mutators
-  public void load() throws IOException{
+  public void load(){
     try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
       this.putAll(mapper.readValue(br.readLine(), HashMap.class));
     } catch (IOException ioe) {
       Logger.getLogger(getClass().getName()).log(
-              Level.SEVERE, String.format("\"%s\" not found", fileName), ioe
+              Level.WARNING, String.format("\"%s\" not found", fileName), ioe
       );
-      throw ioe;
     }
   }
 

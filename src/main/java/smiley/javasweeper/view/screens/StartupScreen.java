@@ -40,13 +40,8 @@ public class StartupScreen extends GenericScreen implements ModelEventListener {
     public void onEvent(ModelEvent me) {
         if (me instanceof AppStartedEvent) {
             this.statusString = "loading settings...";
-            try {
-                Settings.getInstance().load();
-                ModelManager.getInstance().loadSettings();
-            } catch (IOException ioe) {
-                this.statusString = "Could not load settings: " + ioe.getLocalizedMessage();
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, statusString, ioe);
-            }
+            Settings.getInstance().load();
+            ModelManager.getInstance().loadSettings();
         } else if (me instanceof SettingsLoadedEvent) {
             this.statusString = "Loading board...";
             try {

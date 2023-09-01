@@ -1,10 +1,11 @@
-package smiley.javasweeper.controllers.mouse;
+package smiley.notimplemented;
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.Map;
+import smiley.javasweeper.controllers.mouse.Mouse;
 import smiley.javasweeper.view.GamePanel;
 
 public class MouseButtonsOld implements MouseListener {

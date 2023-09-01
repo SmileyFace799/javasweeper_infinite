@@ -1,4 +1,4 @@
-package smiley.javasweeper.view.screens;
+package smiley.notimplemented;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -9,7 +9,8 @@ import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.components.MenuWindow;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.view.components.Slider;
-import smiley.javasweeper.controllers.UIHandler;
+import smiley.javasweeper.view.screens.GameState;
+import smiley.javasweeper.view.screens.State;
 
 public class SettingsState implements State {
   private final GamePanel gp;

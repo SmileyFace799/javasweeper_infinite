@@ -1,13 +1,6 @@
 package smiley.javasweeper.view;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -134,6 +127,14 @@ public class GraphicManager {
             g2.drawString("Draw time: " + (drawTime / 1e6) + "ms", 10, 20);
             g2.drawString("Effective FPS: " + (1e9 / drawTime), 10, 40);
         }
+    }
+
+    public static BufferedImage getFormattedImage(BufferedImage image) {
+        BufferedImage convertedImage = makeFormattedImage(image.getWidth(), image.getHeight());
+        Graphics2D g2 = convertedImage.createGraphics();
+        g2.drawImage(image, 0, 0, null);
+        g2.dispose();
+        return convertedImage;
     }
 
     /**

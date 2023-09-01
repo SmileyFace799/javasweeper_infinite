@@ -2,15 +2,17 @@ package smiley.javasweeper.view.screens;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import smiley.javasweeper.controllers.GameplayController;
-import smiley.javasweeper.controllers.UIHandler;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.intermediary.ModelEventListener;
+import smiley.javasweeper.intermediary.ModelManager;
 import smiley.javasweeper.intermediary.events.BoardLoadedEvent;
 import smiley.javasweeper.intermediary.events.ModelEvent;
-import smiley.javasweeper.intermediary.events.SquareUpdatedEvent;
+import smiley.javasweeper.intermediary.events.SettingsLoadedEvent;
+import smiley.javasweeper.intermediary.events.SquaresUpdatedEvent;
 import smiley.javasweeper.model.Board;
-import smiley.javasweeper.squares.Square;
+import smiley.javasweeper.model.squares.Square;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.GraphicManager;
 
@@ -20,7 +22,6 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
     private final GameplayController controller;
 
     private BufferedImage boardImage;
-    private Graphics2D boardG2;
     private int cameraOffsetX;
     private int cameraOffsetY;
     private Board.Dimensions boardDimensions;
@@ -29,6 +30,7 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
     protected GameplayScreen(GamePanel app) {
         super();
         this.controller = new GameplayController(this, app);
+        ModelManager.getInstance().addListener(this);
     }
 
     public static int getTileSize() {
@@ -64,7 +66,7 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
                 (1 + (maxX - minX)) * tileSize,
                 (1 + (maxY - minY)) * tileSize
         );
-        this.boardG2 = boardImage.createGraphics();
+        Graphics2D g2 = boardImage.createGraphics();
         for (Square square : board) {
             int x = square.getX();
             int y = square.getY();
@@ -72,15 +74,13 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
             if (x < minX || x > maxX || y < minY || y > maxY) {
                 System.out.println("x=" + x + " & y=" + y + ": Square is out of bounds");
             } else {
-                boardG2.drawImage(square.getTx(), (x - minX) * tileSize, (y - minY) * tileSize, null);
+                g2.drawImage(square.getTx(), (x - minX) * tileSize, (y - minY) * tileSize, null);
             }
         }
-        boardG2.dispose();
+        g2.dispose();
     }
 
-    public void updateImage(Square square) {
-        int x = square.getX();
-        int y = square.getY();
+    public void updateImage(List<Square> squares) {
         int tileSize = getTileSize();
 
         if (!boardDimensions.equals(imageDimensions)) {
@@ -90,25 +90,28 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
             );
             Graphics2D newG2 = newImage.createGraphics();
 
-            if (x < imageDimensions.getMinX()) {
-                newG2.drawImage(boardImage, (imageDimensions.getMinX() - x) * tileSize, 0, null);
+            if (boardDimensions.getMinX() < imageDimensions.getMinX()) {
+                newG2.drawImage(boardImage, (imageDimensions.getMinX() - boardDimensions.getMinX()) * tileSize, 0, null);
             }
-            if (y < imageDimensions.getMinY()) {
-                newG2.drawImage(boardImage, 0, (imageDimensions.getMinY() - y) * tileSize, null);
+            if (boardDimensions.getMinY() < imageDimensions.getMinY()) {
+                newG2.drawImage(boardImage, 0, (imageDimensions.getMinY() - boardDimensions.getMinY()) * tileSize, null);
             }
-            if (x > imageDimensions.getMaxX() || y > imageDimensions.getMaxY()) {
+            if (boardDimensions.getMaxX() > imageDimensions.getMaxX() || boardDimensions.getMaxY() > imageDimensions.getMaxY()) {
                 newG2.drawImage(boardImage, 0, 0, null);
             }
             newG2.dispose();
             boardImage = newImage;
-            imageDimensions.expand(x, y);
+            imageDimensions.expand(boardDimensions.getMinX(), boardDimensions.getMinY());
+            imageDimensions.expand(boardDimensions.getMaxX(), boardDimensions.getMaxY());
         }
-        boardG2.drawImage(
+        Graphics2D g2 = boardImage.createGraphics();
+        squares.forEach(square -> g2.drawImage(
                 square.getTx(),
-                (x - boardDimensions.getMinX()) * tileSize,
-                (y - boardDimensions.getMinY()) * tileSize,
+                (square.getX() - boardDimensions.getMinX()) * tileSize,
+                (square.getY() - boardDimensions.getMinY()) * tileSize,
                 null
-        );
+        ));
+        g2.dispose();
     }
 
     @Override
@@ -118,19 +121,24 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
 
     @Override
     public void drawScreen(Graphics2D g2) {
-        g2.drawImage(boardImage,
-                boardDimensions.getMinX() * Board.getTileSize() - cameraOffsetX,
-                boardDimensions.getMinY() * Board.getTileSize() - cameraOffsetY,
-                null
-        );
+        if (boardDimensions != null) {
+            g2.drawImage(boardImage,
+                    boardDimensions.getMinX() * getTileSize() - cameraOffsetX,
+                    boardDimensions.getMinY() * getTileSize() - cameraOffsetY,
+                    null
+            );
+        }
     }
 
     @Override
     public void onEvent(ModelEvent me) {
-        if (me instanceof BoardLoadedEvent ble) {
+        if (me instanceof SettingsLoadedEvent) {
+            cameraOffsetX = -(Settings.getInstance().getDisplayWidth() - getTileSize()) / 2;
+            cameraOffsetY = -(Settings.getInstance().getDisplayHeight() - getTileSize()) / 2;
+        } else if (me instanceof BoardLoadedEvent ble) {
             drawInitialImage(ble.board());
-        } else if (me instanceof SquareUpdatedEvent sue) {
-
+        } else if (me instanceof SquaresUpdatedEvent sue) {
+            updateImage(sue.squares());
         }
     }
 }

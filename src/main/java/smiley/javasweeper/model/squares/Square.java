@@ -1,8 +1,9 @@
-package smiley.javasweeper.squares;
+package smiley.javasweeper.model.squares;
 
 import java.awt.image.BufferedImage;
 import smiley.javasweeper.model.Board;
 import smiley.javasweeper.textures.TxMap;
+import smiley.javasweeper.view.screens.GameplayScreen;
 
 public abstract class Square {
   protected final int xval;
@@ -15,7 +16,7 @@ public abstract class Square {
   public Square(int x, int y) {
     this.xval = x;
     this.yval = y;
-    this.tx = TxMap.getScaled(Board.getTileSize(), "hidden");
+    this.tx = TxMap.getScaled(GameplayScreen.getTileSize(), "squares/hidden.bmp");
   }
 
   //Accessors
@@ -52,9 +53,9 @@ public abstract class Square {
     if (!revealed) {
       flagged = !flagged;
       if (flagged) {
-        setTx(TxMap.getScaled(Board.getTileSize(), "flag"));
+        setTx(TxMap.getScaled(GameplayScreen.getTileSize(), "squares/flag.bmp"));
       } else {
-        setTx(TxMap.getScaled(Board.getTileSize(), "hidden"));
+        setTx(TxMap.getScaled(GameplayScreen.getTileSize(), "squares/hidden.bmp"));
       }
     }
   }

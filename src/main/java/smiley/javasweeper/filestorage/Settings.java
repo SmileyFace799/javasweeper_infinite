@@ -1,16 +1,16 @@
 package smiley.javasweeper.filestorage;
 
-import java.io.IOException;
-
 public class Settings {
   private static Settings instance;
 
   private boolean loaded;
-  private JsonMap<Object> json;
+  private MultiTypeMap<String> map;
+  private JsonMap json;
 
   //Constructor
   private Settings() {
     this.loaded = false;
+    this.map = new MultiTypeMap<>();
   }
 
   public static synchronized Settings getInstance() {
@@ -20,8 +20,9 @@ public class Settings {
     return instance;
   }
 
-  public void load() throws IOException {
-    this.json = new JsonMap<>("settings.json");
+  public void load() {
+    this.json = new JsonMap("settings.json");
+    this.map = json;
     this.loaded = true;
   }
 
@@ -33,40 +34,34 @@ public class Settings {
 
   //Accessors
   public int getDisplayWidth() {
-    verifyLoaded();
-    return (int) json.get("displayWidth");
+    return map.get("displayWidth", Integer.class, 1280);
   }
 
   public int getDisplayHeight() {
-    verifyLoaded();
-    return (int) json.get("displayHeight");
+    return map.get("displayHeight", Integer.class, 720);
   }
 
   public double getMineChance() {
-    verifyLoaded();
-    return (double) json.get("mineChance");
+    return map.get("mineChance", Double.class, 0.25);
   }
 
   public double getBoardScale() {
-    verifyLoaded();
-    return (double) json.get("boardScale");
+    return map.get("boardScale", Double.class, 1D);
   }
 
   public double getUiScale() {
-    verifyLoaded();
-    return (double) json.get("uiScale");
+    return map.get("uiScale", Double.class, 1D);
   }
 
   public boolean isFullscreen() {
-    verifyLoaded();
-    return (boolean) json.get("fullscreen");
+    return map.get("fullscreen", Boolean.class, false);
   }
 
   //Mutators
   public void setDisplayWidth(int width) {
     verifyLoaded();
     if (width >= 0) {
-      json.put("displayWidth", width);
+      map.put("displayWidth", width);
       json.save();
     } else {
       System.out.println("Settings.setDisplayWidth: Expected positive value (Got \"" + width + "\")");
@@ -76,7 +71,7 @@ public class Settings {
   public void setDisplayHeight(int height) {
     verifyLoaded();
     if (height >= 0) {
-      json.put("displayHeight", height);
+      map.put("displayHeight", height);
       json.save();
     } else {
       System.out.println("Settings.setDisplayHeight: Expected positive value (Got \"" + height + "\")");
@@ -86,7 +81,7 @@ public class Settings {
   public void setMineChance(double mineChance) {
     verifyLoaded();
     if (mineChance >= 0 && mineChance <= 100) {
-      json.put("mineChance", mineChance);
+      map.put("mineChance", mineChance);
       json.save();
     } else {
       System.out.println("Settings.setMineChance: Expected value between 0 and 100 [inclusive] (Got \"" + mineChance + "\")");
@@ -96,7 +91,7 @@ public class Settings {
   public void setBoardScale(double boardScale) {
     verifyLoaded();
     if (boardScale > 0) {
-      json.put("boardScale", boardScale);
+      map.put("boardScale", boardScale);
       json.save();
     } else {
       System.out.println(("Settings.setBoardScale: Expected a value greater than 0 (Got \"" + boardScale + "\")"));
@@ -106,7 +101,7 @@ public class Settings {
   public void setUiScale(double uiScale) {
     verifyLoaded();
     if (uiScale > 0) {
-      json.put("uiScale", uiScale);
+      map.put("uiScale", uiScale);
       json.save();
     } else {
       System.out.println("Settings.setUiScale: Expected a value greater than 0 (Got \"" + uiScale + "\")");
@@ -115,7 +110,7 @@ public class Settings {
 
   public void toggleFullscreen() {
     verifyLoaded();
-    json.put("fullscreen", !isFullscreen());
+    map.put("fullscreen", !isFullscreen());
     json.save();
   }
 }
