@@ -76,8 +76,10 @@ public class BoardLoader {
             if (square instanceof NumberSquare numSquare) {
                 boardStr.append("&");
                 boardStr.append(numSquare.isRevealed());
-                boardStr.append("&");
-                boardStr.append(numSquare.getNumber());
+                if (numSquare.isRevealed()) {
+                    boardStr.append("&");
+                    boardStr.append(numSquare.getNumber());
+                }
             }
             boardStr.append("|");
         }

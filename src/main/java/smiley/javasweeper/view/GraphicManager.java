@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import smiley.javasweeper.filestorage.Settings;
-import smiley.javasweeper.view.screens.ScreenManager;
 
 public class GraphicManager {
     public static final int DEFAULT_WINDOW_WIDTH = 1280;
@@ -38,7 +37,7 @@ public class GraphicManager {
     private static GraphicManager instance;
 
     private final int margin;
-    private final int fontSize;
+    private final int textFontSize;
     private final int titleFontSize;
     private final Font textFont;
     private final Font titleFont;
@@ -48,7 +47,7 @@ public class GraphicManager {
     private GraphicManager() {
         double uiScale = Settings.getInstance().getUiScale();
         this.margin = (int) Math.round(uiScale * 3);
-        this.fontSize = (int) Math.round(uiScale * 8);
+        this.textFontSize = (int) Math.round(uiScale * 8);
         this.titleFontSize = (int) Math.round(uiScale * 12);
 
         Font loadedFont = null;
@@ -63,7 +62,7 @@ public class GraphicManager {
             }
         }
         loadedFont = Objects.requireNonNullElse(loadedFont, DEFAULT_FONT);
-        this.textFont = loadedFont.deriveFont(Font.PLAIN, fontSize);
+        this.textFont = loadedFont.deriveFont(Font.PLAIN, textFontSize);
         this.titleFont = loadedFont.deriveFont(Font.PLAIN, titleFontSize);
 
         this.windowWidth = DEFAULT_WINDOW_WIDTH;
@@ -93,6 +92,14 @@ public class GraphicManager {
         return margin;
     }
 
+    public int getTextFontSize() {
+        return textFontSize;
+    }
+
+    public int getTitleFontSize() {
+        return titleFontSize;
+    }
+
     public Font getTextFont() {
         return textFont;
     }
@@ -116,7 +123,13 @@ public class GraphicManager {
         g2.fillRect(0, 0, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
 
         long drawStart = System.nanoTime();
-        ScreenManager.getInstance().getCurrentScreen().drawScreen(g2);
+        Parent view = ViewManager.getInstance().getCurrentScreen();
+        while (view != null) {
+            view.draw(g2);
+            view.getComponents().forEach(component -> component.draw(g2));
+            view = view.getModal();
+
+        }
 
         if (debugEnabled) {
             g2.setFont(DEFAULT_FONT);

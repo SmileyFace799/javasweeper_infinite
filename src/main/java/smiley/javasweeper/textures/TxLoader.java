@@ -7,14 +7,14 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 import smiley.javasweeper.view.GraphicManager;
 
-public class TxMap {
+public class TxLoader {
 
-    private TxMap() {
+    private TxLoader() {
         throw new IllegalStateException("Utility class");
     }
 
     public static BufferedImage get(String path) {
-        InputStream is = TxMap.class.getResourceAsStream(path);
+        InputStream is = TxLoader.class.getResourceAsStream(path);
         if (is == null) {
             throw new IllegalArgumentException(String.format("Resource \"%s\" not found", path));
         }

@@ -2,15 +2,12 @@ package smiley.javasweeper.view;
 
 import java.awt.*;
 import javax.swing.*;
-import smiley.javasweeper.controllers.keyboard.Keyboard;
-import smiley.javasweeper.controllers.mouse.Mouse;
+import smiley.javasweeper.controllers.mouse.InputHandler;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.intermediary.ModelEventListener;
 import smiley.javasweeper.intermediary.ModelManager;
 import smiley.javasweeper.intermediary.events.ModelEvent;
 import smiley.javasweeper.intermediary.events.SettingsLoadedEvent;
-import smiley.javasweeper.view.screens.GameplayScreen;
-import smiley.javasweeper.view.screens.ScreenManager;
 import smiley.javasweeper.view.screens.StartupScreen;
 
 public class GamePanel implements ModelEventListener {
@@ -19,7 +16,6 @@ public class GamePanel implements ModelEventListener {
     public static final int FPS = 60;
     private final JFrame window;
     private Thread gameThread;
-    private Point startDragCamera;
     private boolean debugEnabled = false;
     private final JPanel jPanel = new JPanel() {
         @Override
@@ -41,33 +37,18 @@ public class GamePanel implements ModelEventListener {
         jPanel.setDoubleBuffered(true);
         jPanel.setFocusable(true);
         jPanel.setBackground(Color.black);
-        jPanel.addMouseListener(Mouse.getInstance());
-        jPanel.addMouseMotionListener(Mouse.getInstance());
-        jPanel.addKeyListener(Keyboard.getInstance());
+        jPanel.addMouseListener(InputHandler.getInstance());
+        jPanel.addMouseMotionListener(InputHandler.getInstance());
+        jPanel.addKeyListener(InputHandler.getInstance());
 
-        ScreenManager.getInstance().makeScreens(this);
-        ScreenManager.getInstance().changeScreen(StartupScreen.class);
-    }
-
-    //accessors
-    public JFrame getWindow() {
-        return window;
+        ViewManager.getInstance().makeScreens(this);
+        ViewManager.getInstance().changeScreen(StartupScreen.class);
     }
 
     public JPanel getJPanel() {
         return jPanel;
     }
 
-
-    public Point getStartDragCamera() {
-        return startDragCamera;
-    }
-
-    public void setStartDragCamera(Point pos) {
-        startDragCamera = pos;
-    }
-
-    //mutators
     public void setWindowUndecorated(boolean undecorated) {
         window.dispose();
         window.setUndecorated(undecorated);
@@ -76,6 +57,15 @@ public class GamePanel implements ModelEventListener {
 
     public void toggleDebug() {
         debugEnabled = !debugEnabled;
+    }
+
+    public void toggleFullscreen() {
+        Settings.getInstance().toggleFullscreen();
+        if (Settings.getInstance().isFullscreen()) {
+            disableFullscreen();
+        } else {
+            enableFullscreen();
+        }
     }
 
     //other
@@ -120,15 +110,6 @@ public class GamePanel implements ModelEventListener {
         if (GraphicManager.GRAPHICS_DEVICE.getFullScreenWindow() != null) {
             setWindowUndecorated(false);
             GraphicManager.GRAPHICS_DEVICE.setFullScreenWindow(null);
-        }
-    }
-
-    public void toggleFullscreen() {
-        Settings.getInstance().toggleFullscreen();
-        if (Settings.getInstance().isFullscreen()) {
-            disableFullscreen();
-        } else {
-            enableFullscreen();
         }
     }
 

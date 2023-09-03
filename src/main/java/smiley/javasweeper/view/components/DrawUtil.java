@@ -1,12 +1,20 @@
 package smiley.javasweeper.view.components;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import org.jetbrains.annotations.NotNull;
 import smiley.javasweeper.filestorage.Settings;
 
 public class DrawUtil {
     private DrawUtil() {
         throw new IllegalStateException("Utility class");
+    }
+
+    public static int getCenteredX(int outerWidth, int innerWidth) {
+        return (outerWidth - innerWidth) / 2;
+    }
+
+    public static int getCenteredY(int outerHeight, int innerHeight) {
+        return (outerHeight - innerHeight) / 2;
     }
 
     /**
@@ -17,13 +25,17 @@ public class DrawUtil {
      * @param y   The y-coordinate for the string's baseline
      */
     public static void drawStringCenteredX(@NotNull Graphics2D g2, String str, int y) {
-        g2.drawString(str, (Settings.getInstance().getDisplayWidth() - g2.getFontMetrics().stringWidth(str)) / 2, y);
+        g2.drawString(str, getCenteredX(
+                Settings.getInstance().getDisplayWidth(),
+                g2.getFontMetrics().stringWidth(str)
+        ), y);
     }
 
     public static void drawStringCentered(@NotNull Graphics2D g2, String str) {
-        drawStringCenteredX(g2, str,
-                (Settings.getInstance().getDisplayHeight() - g2.getFontMetrics().getHeight()) / 2
-        );
+        drawStringCenteredX(g2, str, getCenteredY(
+                Settings.getInstance().getDisplayHeight(),
+                g2.getFontMetrics().getHeight()
+        ));
     }
 
     public static void drawStringRightAligned(@NotNull Graphics2D g2, String str, int rightX, int y) {

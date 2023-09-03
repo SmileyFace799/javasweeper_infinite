@@ -2,8 +2,12 @@ package smiley.javasweeper.view.screens;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
-import smiley.javasweeper.controllers.GameplayController;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import smiley.javasweeper.controllers.screen.GameplayController;
+import smiley.javasweeper.filestorage.BoardLoader;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.intermediary.ModelEventListener;
 import smiley.javasweeper.intermediary.ModelManager;
@@ -12,7 +16,10 @@ import smiley.javasweeper.intermediary.events.ModelEvent;
 import smiley.javasweeper.intermediary.events.SettingsLoadedEvent;
 import smiley.javasweeper.intermediary.events.SquaresUpdatedEvent;
 import smiley.javasweeper.model.Board;
+import smiley.javasweeper.model.squares.BombSquare;
+import smiley.javasweeper.model.squares.NumberSquare;
 import smiley.javasweeper.model.squares.Square;
+import smiley.javasweeper.textures.TxLoader;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.GraphicManager;
 
@@ -27,7 +34,7 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
     private Board.Dimensions boardDimensions;
     private Board.Dimensions imageDimensions;
 
-    protected GameplayScreen(GamePanel app) {
+    public GameplayScreen(GamePanel app) {
         super();
         this.controller = new GameplayController(this, app);
         ModelManager.getInstance().addListener(this);
@@ -48,6 +55,24 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
     public void setCameraOffset(int offsetX, int offsetY) {
         this.cameraOffsetX = offsetX;
         this.cameraOffsetY = offsetY;
+    }
+
+    private BufferedImage getSquareTx(Square square) {
+        BufferedImage tx;
+        if (square.isFlagged()) {
+            tx = Textures.FLAG.get();
+        } else if (!square.isRevealed()) {
+            tx = Textures.HIDDEN.get();
+        } else if (square instanceof NumberSquare numberSquare) {
+            tx = Textures.number(numberSquare.getNumber()).get();
+        } else if (square instanceof BombSquare) {
+            tx = Textures.BOMB_DETONATED.get();
+        } else {
+            throw new IllegalStateException(
+                    "Could not find suitable texture for square: " + square
+            );
+        }
+        return tx;
     }
 
     /**
@@ -74,7 +99,12 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
             if (x < minX || x > maxX || y < minY || y > maxY) {
                 System.out.println("x=" + x + " & y=" + y + ": Square is out of bounds");
             } else {
-                g2.drawImage(square.getTx(), (x - minX) * tileSize, (y - minY) * tileSize, null);
+                g2.drawImage(
+                        getSquareTx(square),
+                        (x - minX) * tileSize,
+                        (y - minY) * tileSize,
+                        null
+                );
             }
         }
         g2.dispose();
@@ -89,24 +119,24 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
                     (1 + boardDimensions.getMaxY() - boardDimensions.getMinY()) * tileSize
             );
             Graphics2D newG2 = newImage.createGraphics();
-
+            int drawOffsetX = 0;
+            int drawOffsetY = 0;
             if (boardDimensions.getMinX() < imageDimensions.getMinX()) {
-                newG2.drawImage(boardImage, (imageDimensions.getMinX() - boardDimensions.getMinX()) * tileSize, 0, null);
+                drawOffsetX = (imageDimensions.getMinX() - boardDimensions.getMinX()) * tileSize;
             }
             if (boardDimensions.getMinY() < imageDimensions.getMinY()) {
-                newG2.drawImage(boardImage, 0, (imageDimensions.getMinY() - boardDimensions.getMinY()) * tileSize, null);
+                drawOffsetY = (imageDimensions.getMinY() - boardDimensions.getMinY()) * tileSize;
             }
-            if (boardDimensions.getMaxX() > imageDimensions.getMaxX() || boardDimensions.getMaxY() > imageDimensions.getMaxY()) {
-                newG2.drawImage(boardImage, 0, 0, null);
-            }
+            newG2.drawImage(boardImage, drawOffsetX, drawOffsetY, null);
             newG2.dispose();
             boardImage = newImage;
             imageDimensions.expand(boardDimensions.getMinX(), boardDimensions.getMinY());
             imageDimensions.expand(boardDimensions.getMaxX(), boardDimensions.getMaxY());
         }
+
         Graphics2D g2 = boardImage.createGraphics();
         squares.forEach(square -> g2.drawImage(
-                square.getTx(),
+                getSquareTx(square),
                 (square.getX() - boardDimensions.getMinX()) * tileSize,
                 (square.getY() - boardDimensions.getMinY()) * tileSize,
                 null
@@ -120,7 +150,7 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
     }
 
     @Override
-    public void drawScreen(Graphics2D g2) {
+    public void draw(Graphics2D g2) {
         if (boardDimensions != null) {
             g2.drawImage(boardImage,
                     boardDimensions.getMinX() * getTileSize() - cameraOffsetX,
@@ -137,8 +167,67 @@ public class GameplayScreen extends GenericScreen implements ModelEventListener 
             cameraOffsetY = -(Settings.getInstance().getDisplayHeight() - getTileSize()) / 2;
         } else if (me instanceof BoardLoadedEvent ble) {
             drawInitialImage(ble.board());
+            ModelManager.getInstance().startupFinished();
         } else if (me instanceof SquaresUpdatedEvent sue) {
             updateImage(sue.squares());
+            try {
+                BoardLoader.saveBoard(sue.board());
+            } catch (IOException ioe) {
+                Logger.getLogger(getClass().getName())
+                        .log(Level.SEVERE, "Could not save board", ioe);
+            }
+        }
+    }
+
+    private enum Textures {
+        ZERO("0"),
+        ONE("1"),
+        TWO("2"),
+        THREE("3"),
+        FOUR("4"),
+        FIVE("5"),
+        SIX("6"),
+        SEVEN("7"),
+        EIGHT("8"),
+
+        HIDDEN("hidden"),
+        FLAG("flag"),
+        BOMB_DETONATED("bombDetonated"),
+        BOMB_REVEALED("bombRevealed"),
+        FLAG_WRONG("flagWrong");
+
+        private static final String SQUARES_PATH = "squares";
+        private static final String SQUARES_EXTENSION = ".bmp";
+
+        private final String squareName;
+
+        Textures(String squareName) {
+            this.squareName = squareName;
+        }
+
+        public static Textures number(int number) {
+            Textures texture;
+            switch (number) {
+                case 0 -> texture = ZERO;
+                case 1 -> texture = ONE;
+                case 2 -> texture = TWO;
+                case 3 -> texture = THREE;
+                case 4 -> texture = FOUR;
+                case 5 -> texture = FIVE;
+                case 6 -> texture = SIX;
+                case 7 -> texture = SEVEN;
+                case 8 -> texture = EIGHT;
+                default -> throw new IllegalArgumentException(
+                        String.format("No square texture for number \"%s\"", number)
+                );
+            }
+            return texture;
+        }
+
+        public BufferedImage get() {
+            return TxLoader.getScaled(getTileSize(),
+                    String.format("%s/%s%s", SQUARES_PATH, squareName, SQUARES_EXTENSION)
+            );
         }
     }
 }

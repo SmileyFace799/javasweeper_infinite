@@ -71,4 +71,7 @@
     <orderEntry type="library" name="Maven: com.github.walkyst.lavaplayer-fork:lavaplayer-stream-merger:1.4.0" level="project" />
     <orderEntry type="library" name="Maven: com.github.walkyst.lavaplayer-fork:lavaplayer-test-samples:1.4.0" level="project" />
   </component>
+  <component name="SonarLintModuleSettings">
+    <option name="uniqueId" value="8e33a831-1fa0-4d49-9fd8-ccc1419c56c9" />
+  </component>
 </module>

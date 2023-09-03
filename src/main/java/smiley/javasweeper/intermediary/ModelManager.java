@@ -2,11 +2,12 @@ package smiley.javasweeper.intermediary;
 
 import java.util.ArrayList;
 import java.util.List;
-import smiley.javasweeper.intermediary.events.AppStartedEvent;
+import smiley.javasweeper.intermediary.events.AppLaunchedEvent;
 import smiley.javasweeper.intermediary.events.BoardLoadedEvent;
 import smiley.javasweeper.intermediary.events.ModelEvent;
 import smiley.javasweeper.intermediary.events.SettingsLoadedEvent;
 import smiley.javasweeper.intermediary.events.SquaresUpdatedEvent;
+import smiley.javasweeper.intermediary.events.StartupFinishedEvent;
 import smiley.javasweeper.model.Board;
 import smiley.javasweeper.model.squares.NumberSquare;
 import smiley.javasweeper.model.squares.Square;
@@ -46,7 +47,7 @@ public class ModelManager {
         if (!board.get(x, y).isRevealed()) {
             updatedSquares.addAll(board.reveal(x, y));
         }
-        notifyListeners(new SquaresUpdatedEvent(updatedSquares));
+        notifyListeners(new SquaresUpdatedEvent(board, updatedSquares));
     }
 
     public void flagBoardSquare(int x, int y) {
@@ -56,7 +57,7 @@ public class ModelManager {
             square.toggleFlagged();
             updatedSquares.add(square);
         }
-        notifyListeners(new SquaresUpdatedEvent(updatedSquares));
+        notifyListeners(new SquaresUpdatedEvent(board, updatedSquares));
     }
 
     public void smartRevealSurrounding(int x, int y) {
@@ -67,11 +68,11 @@ public class ModelManager {
         ) {
             updatedSquares.addAll(board.massReveal(x, y));
         }
-        notifyListeners(new SquaresUpdatedEvent(updatedSquares));
+        notifyListeners(new SquaresUpdatedEvent(board, updatedSquares));
     }
 
     public void appStarted() {
-        notifyListeners(new AppStartedEvent());
+        notifyListeners(new AppLaunchedEvent());
     }
 
     public void loadSettings() {
@@ -81,5 +82,9 @@ public class ModelManager {
     public void setBoard(Board board) {
         this.board = board;
         notifyListeners(new BoardLoadedEvent(board));
+    }
+
+    public void startupFinished() {
+        notifyListeners(new StartupFinishedEvent());
     }
 }
