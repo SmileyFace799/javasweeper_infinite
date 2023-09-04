@@ -20,6 +20,8 @@ public abstract class Square {
     return flagged;
   }
 
+  public abstract boolean isMassRevealCountable();
+
   public int getX() {
     return xval;
   }

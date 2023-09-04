@@ -96,6 +96,7 @@ public class GameplayController extends GenericScreenController {
 
     @Override
     public void keyReleased(KeyEvent ke) {
+        super.keyReleased(ke);
         if (ke.getKeyCode() == KeyEvent.VK_ESCAPE) {
             PauseModal pauseModal = ViewManager.getInstance().getmodal(PauseModal.class);
             getView().placeModal(pauseModal,

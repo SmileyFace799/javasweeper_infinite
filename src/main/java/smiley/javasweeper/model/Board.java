@@ -22,6 +22,8 @@ public class Board implements Iterable<Square> {
     private final double mineChance;
     private final String filename;
 
+    private boolean exploded;
+
     private Board() {
         this("");
     }
@@ -31,6 +33,7 @@ public class Board implements Iterable<Square> {
         this.dimensions = new Dimensions();
         this.filename = filename;
         this.mineChance = Settings.getInstance().getMineChance();
+        this.exploded = false;
     }
 
     //Accessors
@@ -174,8 +177,9 @@ public class Board implements Iterable<Square> {
                 if (squareNumber == 0 && doMassReveal) {
                     updatedSquares.addAll(massReveal(x, y));
                 }
-            } else {
+            } else if (square instanceof BombSquare) {
                 square.setRevealedTrue();
+                exploded = true;
             }
         }
         dimensions.expand(square.getX(), square.getY());
@@ -200,34 +204,37 @@ public class Board implements Iterable<Square> {
         List<Square> updatedSquares = new ArrayList<>();
         Board nextRevealBoard = new Board();
         for (Square square : revealBoard) {
-            NumberSquare revealSquare = (NumberSquare) square;
-            if (!revealSquare.isFlagged() && !revealSquare.isRevealed()) {
+            if (!square.isFlagged() && !square.isRevealed()) {
                 updatedSquares.addAll(reveal(
-                        revealSquare.getX(), revealSquare.getY(), false
+                        square.getX(), square.getY(), false
                 ));
             }
-            List<Square> surroundingSquares =
-                    getAdjacentPoints(revealSquare.getX(), revealSquare.getY())
-                            .stream()
-                            .map(xy -> get(xy[0], xy[1]))
-                            .toList();
-            if (recursionCount > 0 && revealSquare.getNumber()
-                    == surroundingSquares
-                    .stream()
-                    .filter(Square::isFlagged)
-                    .count()
-            ) {
-                for (Square surroundingSquare : surroundingSquares) {
-                    if (!nextRevealBoard.exists(surroundingSquare.getX(), surroundingSquare.getY())
-                            && !surroundingSquare.isRevealed()
-                            && !surroundingSquare.isFlagged()
-                    ) {
-                        nextRevealBoard.put(
-                                surroundingSquare.getX(), surroundingSquare.getY(),
-                                surroundingSquare
-                        );
+            if (square instanceof NumberSquare revealSquare) {
+                List<Square> surroundingSquares =
+                        getAdjacentPoints(revealSquare.getX(), revealSquare.getY())
+                                .stream()
+                                .map(xy -> get(xy[0], xy[1]))
+                                .toList();
+                if (recursionCount > 0 && revealSquare.getNumber()
+                        == surroundingSquares
+                        .stream()
+                        .filter(Square::isMassRevealCountable)
+                        .count()
+                ) {
+                    for (Square surroundingSquare : surroundingSquares) {
+                        if (!nextRevealBoard.exists(surroundingSquare.getX(), surroundingSquare.getY())
+                                && !surroundingSquare.isRevealed()
+                                && !surroundingSquare.isFlagged()
+                        ) {
+                            nextRevealBoard.put(
+                                    surroundingSquare.getX(), surroundingSquare.getY(),
+                                    surroundingSquare
+                            );
+                        }
                     }
                 }
+            } else {
+                recursionCount = 0;
             }
         }
         if (recursionCount > 0 && !nextRevealBoard.getBoardMap().isEmpty()) {

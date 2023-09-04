@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
 public class JsonMap extends MultiTypeMap<String> {
-  final transient ObjectMapper mapper = new ObjectMapper();
+  final ObjectMapper mapper = new ObjectMapper();
   final String fileName;
 
   public JsonMap(String fileName) {
@@ -32,7 +32,7 @@ public class JsonMap extends MultiTypeMap<String> {
 
   public void save() {
     try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName))) {
-      bw.write(mapper.writeValueAsString(this));
+      bw.write(mapper.writeValueAsString(getAll()));
     } catch (IOException e) {
       e.printStackTrace();
     }

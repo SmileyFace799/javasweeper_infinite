@@ -19,6 +19,7 @@ public class PauseController extends GenericModalController{
 
     @Override
     public void keyReleased(KeyEvent ke) {
+        super.keyReleased(ke);
         if (ke.getKeyCode() == KeyEvent.VK_ESCAPE) {
             getView().getParent().closeModal();
         }

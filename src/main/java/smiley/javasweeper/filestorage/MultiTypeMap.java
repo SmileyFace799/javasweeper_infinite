@@ -34,4 +34,8 @@ public class MultiTypeMap<K> {
     public <V> V get(K key, Class<V> returnType, V fallback) {
         return returnType.cast(valueMap.getOrDefault(key, fallback));
     }
+
+    public Map<K, Object> getAll() {
+        return valueMap;
+    }
 }

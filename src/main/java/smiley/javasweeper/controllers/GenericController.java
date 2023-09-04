@@ -1,11 +1,11 @@
 package smiley.javasweeper.controllers;
 
-import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 import smiley.javasweeper.controllers.mouse.InputListener;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.GenericView;
 
-public abstract class GenericController implements InputListener, KeyListener {
+public abstract class GenericController implements InputListener {
     private final GamePanel app;
 
     protected GenericController(GamePanel app) {
@@ -13,4 +13,11 @@ public abstract class GenericController implements InputListener, KeyListener {
     }
 
     public abstract GenericView getView();
+
+    @Override
+    public void keyReleased(KeyEvent ke) {
+        if (ke.getKeyCode() == KeyEvent.VK_F11) {
+            app.toggleFullscreen();
+        }
+    }
 }
