@@ -1,116 +1,125 @@
 package smiley.javasweeper.filestorage;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Settings {
-  private static Settings instance;
+    private static final MultiTypeMap<String> DEFAULTS = new MultiTypeMap<>(Map.of(
+            Keys.DISPLAY_WIDTH, 1280,
+            Keys.DISPLAY_HEIGHT, 720,
+            Keys.MINE_CHANCE, 0.25,
+            Keys.BOARD_SCALE, 1D,
+            Keys.UI_SCALE, 1D,
+            Keys.FULLSCREEN, false
+    ));
 
-  private boolean loaded;
-  private MultiTypeMap<String> map;
-  private JsonMap json;
+    private final MultiTypeMap<String> map;
 
-  //Constructor
-  private Settings() {
-    this.loaded = false;
-    this.map = new MultiTypeMap<>();
-  }
-
-  public static synchronized Settings getInstance() {
-    if (instance == null) {
-      instance = new Settings();
+    public Settings(String filepath) throws IOException {
+        this.map = new JsonMap(filepath);
     }
-    return instance;
-  }
 
-  public void load() {
-    this.json = new JsonMap("settings.json");
-    this.map = json;
-    this.loaded = true;
-  }
-
-  private void verifyLoaded() throws IllegalStateException {
-    if (!loaded) {
-      throw new IllegalStateException("Settings not loaded");
+    public static <V> V getDefault(String key, Class<V> valueType) {
+        return DEFAULTS.get(key, valueType);
     }
-  }
 
-  //Accessors
-  public int getDisplayWidth() {
-    return map.get("displayWidth", Integer.class, 1280);
-  }
-
-  public int getDisplayHeight() {
-    return map.get("displayHeight", Integer.class, 720);
-  }
-
-  public double getMineChance() {
-    return map.get("mineChance", Double.class, 0.25);
-  }
-
-  public double getBoardScale() {
-    return map.get("boardScale", Double.class, 1D);
-  }
-
-  public double getUiScale() {
-    return map.get("uiScale", Double.class, 1D);
-  }
-
-  public boolean isFullscreen() {
-    return map.get("fullscreen", Boolean.class, false);
-  }
-
-  //Mutators
-  public void setDisplayWidth(int width) {
-    verifyLoaded();
-    if (width >= 0) {
-      map.put("displayWidth", width);
-      json.save();
-    } else {
-      System.out.println("Settings.setDisplayWidth: Expected positive value (Got \"" + width + "\")");
+    private void save() {
+        if (map instanceof JsonMap json) {
+            try {
+                json.save();
+            } catch (IOException ioe) {
+                Logger.getLogger(getClass().getName()).log(
+                        Level.WARNING,
+                        String.format("Unable to save settings to file \"%s\"", json.getFilePath()),
+                        ioe
+                );
+            }
+        }
     }
-  }
 
-  public void setDisplayHeight(int height) {
-    verifyLoaded();
-    if (height >= 0) {
-      map.put("displayHeight", height);
-      json.save();
-    } else {
-      System.out.println("Settings.setDisplayHeight: Expected positive value (Got \"" + height + "\")");
+    public int getDisplayWidth() {
+        return map.get(Keys.DISPLAY_WIDTH, Integer.class);
     }
-  }
 
-  public void setMineChance(double mineChance) {
-    verifyLoaded();
-    if (mineChance >= 0 && mineChance <= 100) {
-      map.put("mineChance", mineChance);
-      json.save();
-    } else {
-      System.out.println("Settings.setMineChance: Expected value between 0 and 100 [inclusive] (Got \"" + mineChance + "\")");
+    public void setDisplayWidth(int width) {
+        if (width < 400) {
+            throw new IllegalArgumentException("Settings.setDisplayWidth: Value must be 400 or greater (Got \"" + width + "\")");
+        }
+        map.put(Keys.DISPLAY_WIDTH, width);
+        save();
     }
-  }
 
-  public void setBoardScale(double boardScale) {
-    verifyLoaded();
-    if (boardScale > 0) {
-      map.put("boardScale", boardScale);
-      json.save();
-    } else {
-      System.out.println(("Settings.setBoardScale: Expected a value greater than 0 (Got \"" + boardScale + "\")"));
+    public int getDisplayHeight() {
+        return map.get(Keys.DISPLAY_HEIGHT, Integer.class);
     }
-  }
 
-  public void setUiScale(double uiScale) {
-    verifyLoaded();
-    if (uiScale > 0) {
-      map.put("uiScale", uiScale);
-      json.save();
-    } else {
-      System.out.println("Settings.setUiScale: Expected a value greater than 0 (Got \"" + uiScale + "\")");
+    public void setDisplayHeight(int height) {
+        if (height < 300) {
+            throw new IllegalArgumentException("Settings.setDisplayHeight: Value must be 300 or greater (Got \"" + height + "\")");
+        }
+        map.put(Keys.DISPLAY_HEIGHT, height);
+        save();
     }
-  }
 
-  public void toggleFullscreen() {
-    verifyLoaded();
-    map.put("fullscreen", !isFullscreen());
-    json.save();
-  }
+    public double getMineChance() {
+        return map.get(Keys.MINE_CHANCE, Double.class);
+    }
+
+    public void setMineChance(double mineChance) {
+        if (mineChance < 0 || mineChance > 1) {
+            throw new IllegalArgumentException("Settings.setMineChance: Expected value between 0 and 1 [inclusive] (Got \"" + mineChance + "\")");
+        }
+        map.put(Keys.MINE_CHANCE, mineChance);
+        save();
+    }
+
+    public double getBoardScale() {
+        return map.get(Keys.BOARD_SCALE, Double.class);
+    }
+
+    public void setBoardScale(double boardScale) {
+        if (boardScale <= 0) {
+            throw new IllegalArgumentException(("Settings.setBoardScale: Expected a value greater than 0 (Got \"" + boardScale + "\")"));
+        }
+        map.put(Keys.BOARD_SCALE, boardScale);
+        save();
+    }
+
+    public double getUiScale() {
+        return map.get(Keys.UI_SCALE, Double.class);
+    }
+
+    public void setUiScale(double uiScale) {
+        if (uiScale <= 0) {
+            throw new IllegalArgumentException("Settings.setUiScale: Expected a value greater than 0 (Got \"" + uiScale + "\")");
+        }
+        map.put(Keys.UI_SCALE, uiScale);
+        save();
+    }
+
+    public boolean isFullscreen() {
+        return map.get(Keys.FULLSCREEN, Boolean.class);
+    }
+
+    public boolean toggleFullscreen() {
+        boolean newValue = !isFullscreen();
+        map.put(Keys.FULLSCREEN, newValue);
+        save();
+        return newValue;
+    }
+
+    public static class Keys {
+        public static final String DISPLAY_WIDTH = "displayWidth";
+        public static final String DISPLAY_HEIGHT = "displayHeight";
+        public static final String MINE_CHANCE = "mineChance";
+        public static final String BOARD_SCALE = "boardScale";
+        public static final String UI_SCALE = "uiScale";
+        public static final String FULLSCREEN = "fullscreen";
+
+        private Keys() {
+            throw new IllegalStateException("Utility class");
+        }
+    }
 }

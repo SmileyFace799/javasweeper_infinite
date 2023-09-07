@@ -2,12 +2,12 @@ package smiley.javasweeper.intermediary;
 
 import java.util.ArrayList;
 import java.util.List;
-import smiley.javasweeper.intermediary.events.AppLaunchedEvent;
-import smiley.javasweeper.intermediary.events.BoardLoadedEvent;
-import smiley.javasweeper.intermediary.events.ModelEvent;
-import smiley.javasweeper.intermediary.events.SettingsLoadedEvent;
-import smiley.javasweeper.intermediary.events.SquaresUpdatedEvent;
-import smiley.javasweeper.intermediary.events.StartupFinishedEvent;
+import smiley.javasweeper.intermediary.events.file.AppLaunchedEvent;
+import smiley.javasweeper.intermediary.events.file.BoardLoadedEvent;
+import smiley.javasweeper.intermediary.events.model.ModelEvent;
+import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
+import smiley.javasweeper.intermediary.events.model.SquaresUpdatedEvent;
+import smiley.javasweeper.intermediary.events.file.StartupFinishedEvent;
 import smiley.javasweeper.model.Board;
 import smiley.javasweeper.model.squares.NumberSquare;
 import smiley.javasweeper.model.squares.Square;
@@ -71,20 +71,8 @@ public class ModelManager {
         notifyListeners(new SquaresUpdatedEvent(board, updatedSquares));
     }
 
-    public void appStarted() {
-        notifyListeners(new AppLaunchedEvent());
-    }
-
-    public void loadSettings() {
-        notifyListeners(new SettingsLoadedEvent());
-    }
-
     public void setBoard(Board board) {
         this.board = board;
         notifyListeners(new BoardLoadedEvent(board));
-    }
-
-    public void startupFinished() {
-        notifyListeners(new StartupFinishedEvent());
     }
 }

@@ -3,9 +3,9 @@ package smiley.javasweeper.controllers.screen;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import smiley.javasweeper.controllers.mouse.InputHandler;
-import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.intermediary.ModelManager;
 import smiley.javasweeper.view.GamePanel;
+import smiley.javasweeper.view.GraphicManager;
 import smiley.javasweeper.view.ViewManager;
 import smiley.javasweeper.view.components.DrawUtil;
 import smiley.javasweeper.view.modals.PauseModal;
@@ -32,11 +32,11 @@ public class GameplayController extends GenericScreenController {
     }
 
     private int getClickedColumn(int cursorX) {
-        return Math.floorDiv(cursorX + getView().getCameraOffsetX(), GameplayScreen.getTileSize());
+        return Math.floorDiv(cursorX + getView().getCameraOffsetX(), getView().getTileSize());
     }
 
     private int getClickedRow(int cursorY) {
-        return Math.floorDiv(cursorY + getView().getCameraOffsetY(), GameplayScreen.getTileSize());
+        return Math.floorDiv(cursorY + getView().getCameraOffsetY(), getView().getTileSize());
     }
 
     @Override
@@ -101,11 +101,11 @@ public class GameplayController extends GenericScreenController {
             PauseModal pauseModal = ViewManager.getInstance().getmodal(PauseModal.class);
             getView().placeModal(pauseModal,
                     DrawUtil.getCenteredX(
-                            Settings.getInstance().getDisplayWidth(),
+                            GraphicManager.getInstance().getWindowWidth(),
                             pauseModal.getWidth()
                     ),
                     DrawUtil.getCenteredY(
-                            Settings.getInstance().getDisplayHeight(),
+                            GraphicManager.getInstance().getWindowHeight(),
                             pauseModal.getHeight()
                     )
             );

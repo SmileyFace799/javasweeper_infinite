@@ -1,4 +1,4 @@
-package smiley.javasweeper.intermediary.events;
+package smiley.javasweeper.intermediary.events.model;
 
 import java.util.List;
 import smiley.javasweeper.model.Board;

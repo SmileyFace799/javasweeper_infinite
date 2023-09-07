@@ -32,7 +32,7 @@ public class Board implements Iterable<Square> {
         this.boardMap = new HashMap<>();
         this.dimensions = new Dimensions();
         this.filename = filename;
-        this.mineChance = Settings.getInstance().getMineChance();
+        this.mineChance = 0.3;
         this.exploded = false;
     }
 
@@ -121,7 +121,7 @@ public class Board implements Iterable<Square> {
      * @return A list of every square that was updated in the revealing process
      */
     public List<Square> reveal(int x, int y) {
-        return reveal(x, y, Settings.getInstance().getMineChance(), true);
+        return reveal(x, y, mineChance, true);
     }
 
     /**
@@ -145,7 +145,7 @@ public class Board implements Iterable<Square> {
      * @return A list of every square that was updated in the revealing process
      */
     public List<Square> reveal(int x, int y, boolean doMassReveal) {
-        return reveal(x, y, Settings.getInstance().getMineChance(), doMassReveal);
+        return reveal(x, y, mineChance, doMassReveal);
     }
 
     /**

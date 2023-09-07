@@ -3,6 +3,7 @@ package smiley.javasweeper.view.components;
 import java.awt.Graphics2D;
 import org.jetbrains.annotations.NotNull;
 import smiley.javasweeper.filestorage.Settings;
+import smiley.javasweeper.view.GraphicManager;
 
 public class DrawUtil {
     private DrawUtil() {
@@ -26,14 +27,14 @@ public class DrawUtil {
      */
     public static void drawStringCenteredX(@NotNull Graphics2D g2, String str, int y) {
         g2.drawString(str, getCenteredX(
-                Settings.getInstance().getDisplayWidth(),
+                GraphicManager.getInstance().getWindowWidth(),
                 g2.getFontMetrics().stringWidth(str)
         ), y);
     }
 
     public static void drawStringCentered(@NotNull Graphics2D g2, String str) {
         drawStringCenteredX(g2, str, getCenteredY(
-                Settings.getInstance().getDisplayHeight(),
+                GraphicManager.getInstance().getWindowHeight(),
                 g2.getFontMetrics().getHeight()
         ));
     }

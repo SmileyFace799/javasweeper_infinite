@@ -4,13 +4,14 @@ import java.awt.*;
 import javax.swing.*;
 import smiley.javasweeper.controllers.mouse.InputHandler;
 import smiley.javasweeper.filestorage.Settings;
-import smiley.javasweeper.intermediary.ModelEventListener;
-import smiley.javasweeper.intermediary.ModelManager;
-import smiley.javasweeper.intermediary.events.ModelEvent;
-import smiley.javasweeper.intermediary.events.SettingsLoadedEvent;
+import smiley.javasweeper.intermediary.FileEventListener;
+import smiley.javasweeper.intermediary.FileManager;
+import smiley.javasweeper.intermediary.events.file.FileEvent;
+import smiley.javasweeper.intermediary.events.file.SettingUpdatedEvent;
+import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
 import smiley.javasweeper.view.screens.StartupScreen;
 
-public class GamePanel implements ModelEventListener {
+public class GamePanel implements FileEventListener {
 
     //CONSTANTS
     public static final int FPS = 60;
@@ -32,7 +33,7 @@ public class GamePanel implements ModelEventListener {
     public GamePanel(JFrame window) {
         this.window = window;
 
-        ModelManager.getInstance().addListener(this);
+        FileManager.getInstance().addListener(this);
 
         jPanel.setDoubleBuffered(true);
         jPanel.setFocusable(true);
@@ -40,6 +41,10 @@ public class GamePanel implements ModelEventListener {
         jPanel.addMouseListener(InputHandler.getInstance());
         jPanel.addMouseMotionListener(InputHandler.getInstance());
         jPanel.addKeyListener(InputHandler.getInstance());
+        jPanel.setPreferredSize(new Dimension(
+                Settings.getDefault(Settings.Keys.DISPLAY_WIDTH, Integer.class),
+                Settings.getDefault(Settings.Keys.DISPLAY_HEIGHT, Integer.class)
+        ));
 
         ViewManager.getInstance().makeScreens(this);
         ViewManager.getInstance().changeScreen(StartupScreen.class);
@@ -57,15 +62,6 @@ public class GamePanel implements ModelEventListener {
 
     public void toggleDebug() {
         debugEnabled = !debugEnabled;
-    }
-
-    public void toggleFullscreen() {
-        Settings.getInstance().toggleFullscreen();
-        if (Settings.getInstance().isFullscreen()) {
-            disableFullscreen();
-        } else {
-            enableFullscreen();
-        }
     }
 
     //other
@@ -90,7 +86,7 @@ public class GamePanel implements ModelEventListener {
             }
         });
         gameThread.start();
-        ModelManager.getInstance().appStarted();
+        FileManager.getInstance().appStarted();
     }
 
     private void enableFullscreen() {
@@ -104,8 +100,8 @@ public class GamePanel implements ModelEventListener {
 
     private void disableFullscreen() {
         GraphicManager.getInstance().setWindowSize(
-                Settings.getInstance().getDisplayWidth(),
-                Settings.getInstance().getDisplayHeight()
+                GraphicManager.getInstance().getPreferredWindowWidth(),
+                GraphicManager.getInstance().getPreferredWindowHeight()
         );
         if (GraphicManager.GRAPHICS_DEVICE.getFullScreenWindow() != null) {
             setWindowUndecorated(false);
@@ -114,12 +110,35 @@ public class GamePanel implements ModelEventListener {
     }
 
     @Override
-    public void onEvent(ModelEvent me) {
-        if (me instanceof SettingsLoadedEvent) {
+    public void onEvent(FileEvent fe) {
+        if (fe instanceof SettingsLoadedEvent sle) {
+            Settings settings = sle.settings();
             jPanel.setPreferredSize(new Dimension(
-                    Settings.getInstance().getDisplayWidth(),
-                    Settings.getInstance().getDisplayHeight()
+                    settings.getDisplayWidth(),
+                    settings.getDisplayHeight()
+
             ));
+        } else if (fe instanceof SettingUpdatedEvent sue) {
+            switch (sue.setting()) {
+                case (Settings.Keys.DISPLAY_WIDTH) -> jPanel.setPreferredSize(new Dimension(
+                        sue.value(Integer.class),
+                        GraphicManager.getInstance().getPreferredWindowHeight()
+                ));
+                case (Settings.Keys.DISPLAY_HEIGHT) -> jPanel.setPreferredSize(new Dimension(
+                        GraphicManager.getInstance().getPreferredWindowWidth(),
+                        sue.value(Integer.class)
+                ));
+                case (Settings.Keys.FULLSCREEN) -> {
+                    if (sue.value(Boolean.class)) {
+                        enableFullscreen();
+                    } else {
+                        disableFullscreen();
+                    }
+                }
+                default -> {
+                    //Do nothing
+                }
+            }
         }
     }
 }

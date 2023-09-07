@@ -6,25 +6,27 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import smiley.javasweeper.controllers.screen.GenericScreenController;
 import smiley.javasweeper.filestorage.BoardLoader;
-import smiley.javasweeper.filestorage.Settings;
+import smiley.javasweeper.intermediary.FileEventListener;
+import smiley.javasweeper.intermediary.FileManager;
 import smiley.javasweeper.intermediary.ModelEventListener;
 import smiley.javasweeper.intermediary.ModelManager;
-import smiley.javasweeper.intermediary.events.AppLaunchedEvent;
-import smiley.javasweeper.intermediary.events.ModelEvent;
-import smiley.javasweeper.intermediary.events.SettingsLoadedEvent;
-import smiley.javasweeper.intermediary.events.StartupFinishedEvent;
+import smiley.javasweeper.intermediary.events.file.AppLaunchedEvent;
+import smiley.javasweeper.intermediary.events.file.FileEvent;
+import smiley.javasweeper.intermediary.events.model.ModelEvent;
+import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
+import smiley.javasweeper.intermediary.events.file.StartupFinishedEvent;
 import smiley.javasweeper.model.Board;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.GraphicManager;
 import smiley.javasweeper.view.ViewManager;
 import smiley.javasweeper.view.components.DrawUtil;
 
-public class StartupScreen extends GenericScreen implements ModelEventListener {
+public class StartupScreen extends GenericScreen implements FileEventListener {
     private String statusString;
 
     public StartupScreen(GamePanel app) {
         super();
-        ModelManager.getInstance().addListener(this);
+        FileManager.getInstance().addListener(this);
         this.statusString = "Starting game...";
     }
 
@@ -41,12 +43,11 @@ public class StartupScreen extends GenericScreen implements ModelEventListener {
     }
 
     @Override
-    public void onEvent(ModelEvent me) {
-        if (me instanceof AppLaunchedEvent) {
+    public void onEvent(FileEvent fe) {
+        if (fe instanceof AppLaunchedEvent) {
             this.statusString = "loading settings...";
-            Settings.getInstance().load();
-            ModelManager.getInstance().loadSettings();
-        } else if (me instanceof SettingsLoadedEvent) {
+            FileManager.getInstance().loadSettings();
+        } else if (fe instanceof SettingsLoadedEvent) {
             this.statusString = "Loading board...";
             try {
                 if (BoardLoader.boardExists("testBoard.board")) {
@@ -61,7 +62,7 @@ public class StartupScreen extends GenericScreen implements ModelEventListener {
                 this.statusString = "Could not load board: " + ioe.getLocalizedMessage();
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, statusString, ioe);
             }
-        } else if (me instanceof StartupFinishedEvent) {
+        } else if (fe instanceof StartupFinishedEvent) {
             this.statusString = "Drawing board...";
             ViewManager.getInstance().changeScreen(GameplayScreen.class);
         }

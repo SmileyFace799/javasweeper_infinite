@@ -10,10 +10,15 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import smiley.javasweeper.filestorage.Settings;
+import smiley.javasweeper.intermediary.FileEventListener;
+import smiley.javasweeper.intermediary.FileManager;
+import smiley.javasweeper.intermediary.events.file.FileEvent;
+import smiley.javasweeper.intermediary.events.file.SettingUpdatedEvent;
+import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
 
-public class GraphicManager {
-    public static final int DEFAULT_WINDOW_WIDTH = 1280;
-    public static final int DEFAULT_WINDOW_HEIGHT = 720;
+public class GraphicManager implements FileEventListener {
+    public static final int DEFAULT_WINDOW_WIDTH = Settings.getDefault(Settings.Keys.DISPLAY_WIDTH, Integer.class);
+    public static final int DEFAULT_WINDOW_HEIGHT = Settings.getDefault(Settings.Keys.DISPLAY_HEIGHT, Integer.class);
     public static final int DEFAULT_FONT_SIZE = 16;
     public static final Font DEFAULT_FONT = new Font("Arial", Font.PLAIN, DEFAULT_FONT_SIZE);
     public static final String FONT_PATH = "font/font.ttf";
@@ -36,19 +41,19 @@ public class GraphicManager {
 
     private static GraphicManager instance;
 
-    private final int margin;
-    private final int textFontSize;
-    private final int titleFontSize;
-    private final Font textFont;
-    private final Font titleFont;
+    private final Font rawFont;
+    private int margin;
+    private int textFontSize;
+    private int titleFontSize;
+    private Font textFont;
+    private Font titleFont;
+    private int preferredWindowWidth;
+    private int preferredWindowHeight;
     private int windowWidth;
     private int windowHeight;
 
     private GraphicManager() {
-        double uiScale = Settings.getInstance().getUiScale();
-        this.margin = (int) Math.round(uiScale * 3);
-        this.textFontSize = (int) Math.round(uiScale * 8);
-        this.titleFontSize = (int) Math.round(uiScale * 12);
+        FileManager.getInstance().addListener(this);
 
         Font loadedFont = null;
         InputStream fontStream = getClass().getResourceAsStream(FONT_PATH);
@@ -61,12 +66,22 @@ public class GraphicManager {
                 ), e);
             }
         }
-        loadedFont = Objects.requireNonNullElse(loadedFont, DEFAULT_FONT);
-        this.textFont = loadedFont.deriveFont(Font.PLAIN, textFontSize);
-        this.titleFont = loadedFont.deriveFont(Font.PLAIN, titleFontSize);
+        rawFont = Objects.requireNonNullElse(loadedFont, DEFAULT_FONT);
 
-        this.windowWidth = DEFAULT_WINDOW_WIDTH;
-        this.windowHeight = DEFAULT_WINDOW_HEIGHT;
+        updateUiScale(Settings.getDefault(Settings.Keys.UI_SCALE, Double.class));
+
+        this.preferredWindowWidth = DEFAULT_WINDOW_WIDTH;
+        this.preferredWindowHeight = DEFAULT_WINDOW_HEIGHT;
+        resetWindowSize();
+    }
+
+    private void updateUiScale(double uiScale) {
+        this.margin = (int) Math.round(uiScale * 3);
+        this.textFontSize = (int) Math.round(uiScale * 8);
+        this.titleFontSize = (int) Math.round(uiScale * 12);
+
+        this.textFont = rawFont.deriveFont(Font.PLAIN, textFontSize);
+        this.titleFont = rawFont.deriveFont(Font.PLAIN, titleFontSize);
     }
 
     /**
@@ -108,16 +123,38 @@ public class GraphicManager {
         return titleFont;
     }
 
+    public int getPreferredWindowWidth() {
+        return preferredWindowWidth;
+    }
+
+    public int getPreferredWindowHeight() {
+        return preferredWindowHeight;
+    }
+
+    public int getWindowWidth() {
+        return windowWidth;
+    }
+
+    public int getWindowHeight() {
+        return windowHeight;
+    }
+
     public void setWindowSize(int width, int height) {
         this.windowWidth = width;
         this.windowHeight = height;
     }
 
+    public void resetWindowSize() {
+        setWindowSize(windowWidth, windowHeight);
+    }
+
     public void drawScreen(Graphics2D g2, boolean debugEnabled) {
+        /*
         g2.transform(AffineTransform.getScaleInstance(
                 (double) windowWidth / DEFAULT_WINDOW_WIDTH,
                 (double) windowHeight / DEFAULT_WINDOW_HEIGHT
         ));
+         */
         g2.setFont(textFont);
         g2.setColor(Color.black);
         g2.fillRect(0, 0, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
@@ -159,5 +196,22 @@ public class GraphicManager {
      */
     public static BufferedImage makeFormattedImage(int width, int height) {
         return GRAPHICS_CONFIG.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
+    }
+
+    @Override
+    public void onEvent(FileEvent fe) {
+        if (fe instanceof SettingsLoadedEvent sle) {
+            Settings settings = sle.settings();
+            updateUiScale(settings.getUiScale());
+            this.preferredWindowWidth = settings.getDisplayWidth();
+            this.preferredWindowHeight = settings.getDisplayHeight();
+            resetWindowSize();
+        } else if (fe instanceof SettingUpdatedEvent sue) {
+            switch (sue.setting()) {
+                case (Settings.Keys.DISPLAY_WIDTH) -> setWindowSize(sue.value(Integer.class), getWindowHeight());
+                case (Settings.Keys.DISPLAY_HEIGHT) -> setWindowSize(getWindowWidth(), sue.value(Integer.class));
+                case (Settings.Keys.UI_SCALE) -> updateUiScale(sue.value(Double.class));
+            }
+        }
     }
 }

@@ -15,6 +15,11 @@ public class MultiTypeMap<K> {
         valueMap = new HashMap<>();
     }
 
+    public MultiTypeMap(Map<? extends K, ?> map) {
+        this();
+        putAll(map);
+    }
+
     public void put(K key, Object value) {
         valueMap.put(key, value);
     }
