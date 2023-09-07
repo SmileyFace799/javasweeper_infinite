@@ -8,26 +8,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import smiley.javasweeper.controllers.modal.GenericModalController;
+import smiley.javasweeper.filestorage.Settings;
+import smiley.javasweeper.intermediary.FileEventListener;
+import smiley.javasweeper.intermediary.FileManager;
+import smiley.javasweeper.intermediary.events.file.FileEvent;
+import smiley.javasweeper.intermediary.events.file.SettingUpdatedEvent;
+import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
 import smiley.javasweeper.textures.TxLoader;
 import smiley.javasweeper.view.Child;
 import smiley.javasweeper.view.GraphicManager;
 import smiley.javasweeper.view.Parent;
+import smiley.javasweeper.view.components.DrawUtil;
 import smiley.javasweeper.view.components.GenericComponent;
 import smiley.javasweeper.view.screens.GameplayScreen;
 
 /**
  * Represents a menu window with two areas, one upper and lower area, and border
  */
-public abstract class GenericModal implements Child, Parent {
-    private final BufferedImage borderImage;
-    private final BufferedImage upperImageBase;
-    private final BufferedImage lowerImageBase;
-    private final int imageOffsetLeft;
-    private final int upperImageOffsetTop;
-    private final int lowerImageOffsetTop;
-    private final int width;
-    private final int height;
+public abstract class GenericModal implements Child, Parent, FileEventListener {
+    private BufferedImage borderImage;
+    private BufferedImage upperImageBase;
+    private BufferedImage lowerImageBase;
+    private int imageOffsetLeft;
+    private int upperImageOffsetTop;
+    private int lowerImageOffsetTop;
+    private int innerWidth;
+    private int upperHeight;
+    private int lowerHeight;
+    private int width;
+    private int height;
 
+    private double scale;
     private Parent parent;
 
     private GenericModal modal;
@@ -82,10 +93,9 @@ public abstract class GenericModal implements Child, Parent {
      * @param innerWidth  The <b>inner</b> width of the window. Must be 0 or greater
      * @param upperHeight The <b>inner</b> height of the top window. Must be 0 or greater
      * @param lowerHeight The <b>inner</b> height of the bottom window. Must be 0 or greater
-     * @param scale       Multiplier to scale the textures with
      * @see TxLoader
      */
-    protected GenericModal(int innerWidth, int upperHeight, int lowerHeight, double scale) {
+    protected GenericModal(int innerWidth, int upperHeight, int lowerHeight) {
         if (innerWidth < 0) {
             throw new IllegalArgumentException(
                     "MenuWindow: Parameter \"width\" must be 0 or greater (received \"" + innerWidth + "\")"
@@ -99,26 +109,31 @@ public abstract class GenericModal implements Child, Parent {
                     "MenuWindow: Parameter \"lowerHeight\" must be 0 or greater (received \"" + lowerHeight + "\")"
             );
         }
+        this.innerWidth = innerWidth;
+        this.upperHeight = upperHeight;
+        this.lowerHeight = lowerHeight;
+
+        FileManager.getInstance().addListener(this);
 
         //Getting every frame piece, scaled
-        BufferedImage topLeftCorner = Textures.TOP_LEFT_CORNER.get(scale);
-        BufferedImage topRightCorner = Textures.TOP_RIGHT_CORNER.get(scale);
-        BufferedImage midLeftCorner = Textures.MID_LEFT_CORNER.get(scale);
-        BufferedImage midRightCorner = Textures.MID_RIGHT_CORNER.get(scale);
-        BufferedImage bottomLeftCorner = Textures.BOTTOM_LEFT_CORNER.get(scale);
-        BufferedImage bottomRightCorner = Textures.BOTTOM_RIGHT_CORNER.get(scale);
-        BufferedImage topEdge = Textures.TOP_EDGE.get(1, scale);
-        BufferedImage midEdge = Textures.MID_EDGE.get(1, scale);
-        BufferedImage bottomEdge = Textures.BOTTOM_EDGE.get(1, scale);
-        BufferedImage topLeftEdge = Textures.TOP_LEFT_EDGE.get(scale, 1);
-        BufferedImage topRightEdge = Textures.TOP_RIGHT_EDGE.get(scale, 1);
-        BufferedImage bottomLeftEdge = Textures.BOTTOM_LEFT_EDGE.get(scale, 1);
-        BufferedImage bottomRightEdge = Textures.BOTTOM_RIGHT_EDGE.get(scale, 1);
+        BufferedImage topLeftCorner = Textures.TOP_LEFT_CORNER.get(1);
+        BufferedImage topRightCorner = Textures.TOP_RIGHT_CORNER.get(1);
+        BufferedImage midLeftCorner = Textures.MID_LEFT_CORNER.get(1);
+        BufferedImage midRightCorner = Textures.MID_RIGHT_CORNER.get(1);
+        BufferedImage bottomLeftCorner = Textures.BOTTOM_LEFT_CORNER.get(1);
+        BufferedImage bottomRightCorner = Textures.BOTTOM_RIGHT_CORNER.get(1);
+        BufferedImage topEdge = Textures.TOP_EDGE.get(1);
+        BufferedImage midEdge = Textures.MID_EDGE.get(1);
+        BufferedImage bottomEdge = Textures.BOTTOM_EDGE.get(1);
+        BufferedImage topLeftEdge = Textures.TOP_LEFT_EDGE.get(1);
+        BufferedImage topRightEdge = Textures.TOP_RIGHT_EDGE.get(1);
+        BufferedImage bottomLeftEdge = Textures.BOTTOM_LEFT_EDGE.get(1);
+        BufferedImage bottomRightEdge = Textures.BOTTOM_RIGHT_EDGE.get(1);
 
-        width = topLeftCorner.getWidth()
+        this.width = topLeftCorner.getWidth()
                 + innerWidth
                 + topRightCorner.getWidth();
-        height = topLeftCorner.getHeight()
+        this.height = topLeftCorner.getHeight()
                 + upperHeight
                 + midLeftCorner.getHeight()
                 + lowerHeight
@@ -181,6 +196,9 @@ public abstract class GenericModal implements Child, Parent {
         this.components = new ArrayList<>();
         this.componentsX = new HashMap<>();
         this.componentsY = new HashMap<>();
+
+        this.scale = 1;
+        setScale(Settings.getDefault(Settings.Keys.UI_SCALE, Double.class));
     }
 
     @Override
@@ -196,10 +214,23 @@ public abstract class GenericModal implements Child, Parent {
         return height;
     }
 
+    public int getInnerWidth() {
+        return innerWidth;
+    }
+
+    public int getUpperHeight() {
+        return upperHeight;
+    }
+
+    public int getLowerHeight() {
+        return lowerHeight;
+    }
+
     protected abstract void draw(Graphics2D upperG2, Graphics2D lowerG2);
 
     @Override
     public void draw(Graphics2D g2) {
+        g2.drawImage(borderImage, getParentX(), getParentY(), null);
         BufferedImage upperImage = GraphicManager.getFormattedImage(upperImageBase);
         BufferedImage lowerImage = GraphicManager.getFormattedImage(lowerImageBase);
         Graphics2D upperG2 = upperImage.createGraphics();
@@ -209,7 +240,6 @@ public abstract class GenericModal implements Child, Parent {
         draw(upperG2, lowerG2);
         upperG2.dispose();
         lowerG2.dispose();
-
         g2.drawImage(upperImage,
                 getParentX() + imageOffsetLeft,
                 getParentY() + upperImageOffsetTop,
@@ -222,34 +252,42 @@ public abstract class GenericModal implements Child, Parent {
         );
     }
 
+    @Override
     public Parent getParent() {
         return parent;
     }
 
+    @Override
     public void setParent(Parent parent) {
         this.parent = parent;
     }
 
+    @Override
     public int getParentX() {
         return getParent().getModalX();
     }
 
+    @Override
     public int getParentY() {
         return getParent().getModalY();
     }
 
+    @Override
     public GenericModal getModal() {
         return modal;
     }
 
+    @Override
     public int getModalX() {
         return getParentX() + modalX;
     }
 
+    @Override
     public int getModalY() {
         return getParentY() + modalY;
     }
 
+    @Override
     public void placeModal(GenericModal modal, int x, int y) {
         if (modal.getParent() != null) {
             throw new IllegalArgumentException("modal already has a parent");
@@ -260,6 +298,7 @@ public abstract class GenericModal implements Child, Parent {
         modal.setParent(this);
     }
 
+    @Override
     public void closeModal() {
         modal.setParent(null);
         this.modal = null;
@@ -267,18 +306,22 @@ public abstract class GenericModal implements Child, Parent {
         this.modalY = 0;
     }
 
+    @Override
     public List<GenericComponent> getComponents() {
         return components;
     }
 
+    @Override
     public int getComponentX(GenericComponent component) {
         return getParentX() + componentsX.get(component);
     }
 
+    @Override
     public int getComponentY(GenericComponent component) {
         return getParentY() + componentsY.get(component);
     }
 
+    @Override
     public void placeComponent(GenericComponent component, int x, int y) {
         if (component.getParent() != null) {
             throw new IllegalArgumentException("component already has a parent");
@@ -287,6 +330,37 @@ public abstract class GenericModal implements Child, Parent {
         componentsX.put(component, x);
         componentsY.put(component, y);
         component.setParent(this);
+    }
+
+    protected void setScale(double scale) {
+        double scaleMultiplier = scale / this.scale;
+        this.borderImage = DrawUtil.getScaledImage(borderImage, scaleMultiplier);
+        this.upperImageBase = DrawUtil.getScaledImage(upperImageBase, scaleMultiplier);
+        this.lowerImageBase = DrawUtil.getScaledImage(lowerImageBase, scaleMultiplier);
+        this.imageOffsetLeft *= scaleMultiplier;
+        this.upperImageOffsetTop *= scaleMultiplier;
+        this.lowerImageOffsetTop *= scaleMultiplier;
+        this.innerWidth *= scaleMultiplier;
+        this.upperHeight *= scaleMultiplier;
+        this.lowerHeight *= scaleMultiplier;
+        this.width *= scaleMultiplier;
+        this.height *= scaleMultiplier;
+
+        this.modalX *= scaleMultiplier;
+        this.modalY *= scaleMultiplier;
+        componentsX.replaceAll((c, x) -> (int) (x * scaleMultiplier));
+        componentsY.replaceAll((c, y) -> (int) (y * scaleMultiplier));
+
+        this.scale = scale;
+    }
+
+    @Override
+    public void onEvent(FileEvent fe) {
+        if (fe instanceof SettingsLoadedEvent sle) {
+            setScale(sle.settings().getUiScale());
+        } else if (fe instanceof SettingUpdatedEvent sue && Settings.Keys.UI_SCALE.equals(sue.setting())) {
+            setScale(sue.value(Double.class));
+        }
     }
 
     private enum Textures {
@@ -315,12 +389,6 @@ public abstract class GenericModal implements Child, Parent {
 
         public BufferedImage get(double scale) {
             return TxLoader.getRelScaled(scale,
-                    String.format("%s/%s%s", FRAME_PIECES_PATH, framePieceName, FRAME_PIECES_EXTENSION)
-            );
-        }
-
-        public BufferedImage get(double scaleX, double scaleY) {
-            return TxLoader.getRelScaled(scaleX, scaleY,
                     String.format("%s/%s%s", FRAME_PIECES_PATH, framePieceName, FRAME_PIECES_EXTENSION)
             );
         }

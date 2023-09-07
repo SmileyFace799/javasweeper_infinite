@@ -1,6 +1,6 @@
 package smiley.javasweeper.view.modals;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import smiley.javasweeper.controllers.modal.PauseController;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.view.GamePanel;
@@ -12,12 +12,10 @@ public class PauseModal extends GenericModal {
 
     public PauseModal(GamePanel app) {
         super(
-                (int) (150 * Settings.getDefault(Settings.Keys.UI_SCALE, Double.class)),
-                GraphicManager.getInstance().getTextFontSize() + GraphicManager.getInstance().getMargin(),
-                (int) (100 * Settings.getDefault(Settings.Keys.UI_SCALE, Double.class)),
-                1
+                150,
+                GraphicManager.getInstance().getTitleFontSize() + 2 * GraphicManager.getInstance().getMargin(),
+                100
         );
-        //TODO: Be responsive to "UI_SCALE" setting
         this.controller = new PauseController(this, app);
     }
 
@@ -28,6 +26,8 @@ public class PauseModal extends GenericModal {
 
     @Override
     protected void draw(Graphics2D upperG2, Graphics2D lowerG2) {
-        DrawUtil.drawStringCentered(upperG2, "Game Paused");
+        upperG2.setColor(Color.BLACK);
+        upperG2.setFont(GraphicManager.getInstance().getTitleFont());
+        DrawUtil.drawStringCentered(upperG2, "Game Paused", getInnerWidth(), getUpperHeight());
     }
 }

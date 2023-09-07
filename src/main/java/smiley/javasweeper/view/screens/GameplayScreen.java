@@ -29,6 +29,7 @@ import smiley.javasweeper.model.squares.Square;
 import smiley.javasweeper.textures.TxLoader;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.GraphicManager;
+import smiley.javasweeper.view.components.DrawUtil;
 
 public class GameplayScreen extends GenericScreen implements FileEventListener, ModelEventListener {
     private static final int ORIGINAL_TILE_SIZE = 16;
@@ -53,17 +54,7 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
     }
 
     public void setBoardScale(double newScale) {
-        double sizeMultiplier = newScale / boardScale;
-
-        BufferedImage newBoardImage = GraphicManager.makeFormattedImage(
-                (int) (boardImage.getWidth() * sizeMultiplier),
-                (int) (boardImage.getHeight() * sizeMultiplier)
-        );
-        Graphics2D g2 = newBoardImage.createGraphics();
-        g2.drawImage(boardImage, 0, 0, newBoardImage.getWidth(), newBoardImage.getHeight(), null);
-        g2.dispose();
-
-        this.boardImage = newBoardImage;
+        this.boardImage = DrawUtil.getScaledImage(boardImage, newScale / boardScale);
         this.boardScale = newScale;
     }
 

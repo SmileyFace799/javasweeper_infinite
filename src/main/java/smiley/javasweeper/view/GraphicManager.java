@@ -145,7 +145,7 @@ public class GraphicManager implements FileEventListener {
     }
 
     public void resetWindowSize() {
-        setWindowSize(windowWidth, windowHeight);
+        setWindowSize(preferredWindowWidth, preferredWindowHeight);
     }
 
     public void drawScreen(Graphics2D g2, boolean debugEnabled) {
