@@ -5,17 +5,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
-import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.model.squares.BombSquare;
 import smiley.javasweeper.model.squares.NumberSquare;
 import smiley.javasweeper.model.squares.Square;
 
 public class Board implements Iterable<Square> {
-
-    public static final int ORIGINAL_TILE_SIZE = 16;
 
     private final Map<Integer, Map<Integer, Square>> boardMap;
     private final Dimensions dimensions;
@@ -25,14 +23,14 @@ public class Board implements Iterable<Square> {
     private boolean exploded;
 
     private Board() {
-        this("");
+        this(0, "");
     }
 
-    public Board(String filename) {
+    public Board(double mineChance, String filename) {
         this.boardMap = new HashMap<>();
         this.dimensions = new Dimensions();
+        this.mineChance = mineChance;
         this.filename = filename;
-        this.mineChance = 0.3;
         this.exploded = false;
     }
 
@@ -43,6 +41,10 @@ public class Board implements Iterable<Square> {
 
     public Dimensions getDimensions() {
         return dimensions;
+    }
+
+    public double getMineChance() {
+        return mineChance;
     }
 
     public String getFilename() {
@@ -65,14 +67,6 @@ public class Board implements Iterable<Square> {
 
     public boolean isBomb(int x, int y) {
         return get(x, y) instanceof BombSquare;
-    }
-
-    public List<Square> getSquareList() {
-        List<Square> squareList = new ArrayList<>();
-        for (Map<Integer, Square> column : boardMap.values()) {
-            squareList.addAll(column.values());
-        }
-        return squareList;
     }
 
     public List<int[]> getAdjacentPoints(int x, int y) {
@@ -101,9 +95,7 @@ public class Board implements Iterable<Square> {
     }
 
     public void put(int x, int y, Square square) {
-        if (!boardMap.containsKey(x)) {
-            boardMap.put(x, new HashMap<>());
-        }
+        boardMap.computeIfAbsent(x, xVal -> new HashMap<>());
 
         if (!boardMap.get(x).containsKey(y)) {
             boardMap.get(x).put(y, square);
@@ -308,11 +300,9 @@ public class Board implements Iterable<Square> {
             if (this == o) {
                 return true;
             }
-            ;
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            ;
             Dimensions dimensions = (Dimensions) o;
             return minX == dimensions.minX
                     && minY == dimensions.minY
@@ -344,6 +334,9 @@ public class Board implements Iterable<Square> {
 
         @Override
         public Square next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("No squares left");
+            }
             return squares.remove(0);
         }
     }

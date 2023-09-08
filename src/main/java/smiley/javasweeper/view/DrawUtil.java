@@ -1,4 +1,4 @@
-package smiley.javasweeper.view.components;
+package smiley.javasweeper.view;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

@@ -18,9 +18,8 @@ import smiley.javasweeper.textures.TxLoader;
 import smiley.javasweeper.view.Child;
 import smiley.javasweeper.view.GraphicManager;
 import smiley.javasweeper.view.Parent;
-import smiley.javasweeper.view.components.DrawUtil;
+import smiley.javasweeper.view.DrawUtil;
 import smiley.javasweeper.view.components.GenericComponent;
-import smiley.javasweeper.view.screens.GameplayScreen;
 
 /**
  * Represents a menu window with two areas, one upper and lower area, and border

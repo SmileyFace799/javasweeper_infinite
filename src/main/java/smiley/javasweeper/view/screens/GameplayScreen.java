@@ -1,14 +1,11 @@
 package smiley.javasweeper.view.screens;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
 import smiley.javasweeper.controllers.screen.GameplayController;
 import smiley.javasweeper.filestorage.BoardLoader;
 import smiley.javasweeper.filestorage.Settings;
@@ -29,7 +26,7 @@ import smiley.javasweeper.model.squares.Square;
 import smiley.javasweeper.textures.TxLoader;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.GraphicManager;
-import smiley.javasweeper.view.components.DrawUtil;
+import smiley.javasweeper.view.DrawUtil;
 
 public class GameplayScreen extends GenericScreen implements FileEventListener, ModelEventListener {
     private static final int ORIGINAL_TILE_SIZE = 16;

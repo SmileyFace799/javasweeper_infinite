@@ -2,10 +2,9 @@ package smiley.javasweeper.view.modals;
 
 import java.awt.*;
 import smiley.javasweeper.controllers.modal.PauseController;
-import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.GraphicManager;
-import smiley.javasweeper.view.components.DrawUtil;
+import smiley.javasweeper.view.DrawUtil;
 
 public class PauseModal extends GenericModal {
     private final PauseController controller;

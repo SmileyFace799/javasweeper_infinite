@@ -7,7 +7,7 @@ import smiley.javasweeper.intermediary.ModelManager;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.GraphicManager;
 import smiley.javasweeper.view.ViewManager;
-import smiley.javasweeper.view.components.DrawUtil;
+import smiley.javasweeper.view.DrawUtil;
 import smiley.javasweeper.view.modals.PauseModal;
 import smiley.javasweeper.view.screens.GameplayScreen;
 
