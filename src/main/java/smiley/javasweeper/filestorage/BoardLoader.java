@@ -65,9 +65,9 @@ public class BoardLoader {
         Class<? extends Square> squareClass = SQUARE_IDS.get(byteMap.getByte(Template.Keys.TYPE, (byte) 1));
         int x = byteMap.getInt(Template.Keys.X, 0);
         int y = byteMap.getInt(Template.Keys.Y, 0);
-        byte flags = byteMap.getByte("flags", (byte) 0);
-        boolean flagged = (flags & 0b1) == 1;
-        boolean revealed = (flags & 0b10) == 1;
+        byte flags = byteMap.getByte(Template.Keys.FLAGS, (byte) 0);
+        boolean flagged = (flags & 1) == 1;
+        boolean revealed = ((flags >>> 1) & 1) == 1;
         Square square;
         if (squareClass == NumberSquare.class) {
             NumberSquare numberSquare = new NumberSquare(x, y);
@@ -122,7 +122,7 @@ public class BoardLoader {
     }
 
     private static void serializeSquare(Serializer serializer, Square square) {
-        for (String key : Template.BOARD.getTemplate().keySet()) {
+        for (String key : Template.SQUARE.getTemplate().keySet()) {
             switch (key) {
                 case (Template.Keys.TYPE) -> serializer.write((byte) SQUARE_IDS.indexOf(square.getClass()));
                 case (Template.Keys.X) -> serializer.write(ByteBuffer.allocate(4).putInt(square.getX()).array());
