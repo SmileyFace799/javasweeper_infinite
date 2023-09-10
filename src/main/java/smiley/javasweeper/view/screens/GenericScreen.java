@@ -5,11 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import smiley.javasweeper.controllers.screen.GenericScreenController;
+import smiley.javasweeper.view.GenericView;
 import smiley.javasweeper.view.Parent;
 import smiley.javasweeper.view.components.GenericComponent;
 import smiley.javasweeper.view.modals.GenericModal;
 
-public abstract class GenericScreen implements Parent {
+public abstract class GenericScreen implements GenericView, Parent {
     private GenericModal modal;
     private int modalX;
     private int modalY;
@@ -24,7 +25,6 @@ public abstract class GenericScreen implements Parent {
         this.componentsY = new HashMap<>();
     }
 
-    @Override
     public abstract GenericScreenController getController();
 
     public GenericModal getModal() {

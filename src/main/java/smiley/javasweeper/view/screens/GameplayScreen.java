@@ -3,9 +3,14 @@ package smiley.javasweeper.view.screens;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import smiley.javasweeper.controllers.screen.GameplayController;
 import smiley.javasweeper.filestorage.BoardLoader;
 import smiley.javasweeper.filestorage.Settings;
@@ -37,8 +42,11 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
     private int cameraOffsetX;
     private int cameraOffsetY;
     private BufferedImage boardImage;
+    private Graphics2D boardG2;
     private Board.Dimensions boardDimensions;
     private Board.Dimensions imageDimensions;
+
+    private final ExecutorService threadExecutor;
 
     public GameplayScreen(GamePanel app) {
         super();
@@ -46,12 +54,27 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
         this.boardScale = Settings.getDefault(Settings.Keys.BOARD_SCALE, Double.class);
         this.cameraOffsetX = 0;
         this.cameraOffsetY = 0;
+        this.threadExecutor = Executors.newCachedThreadPool();
         FileManager.getInstance().addListener(this);
         ModelManager.getInstance().addListener(this);
     }
 
+    private void setBoardImage(BufferedImage image) {
+        this.boardImage = image;
+        if (boardG2 != null) {
+            boardG2.dispose();
+        }
+        boardG2 = boardImage.createGraphics();
+    }
+
+    private synchronized void drawOnBoard(BufferedImage image, int x, int y) {
+        boardG2.drawImage(image, x, y, null);
+    }
+
     public void setBoardScale(double newScale) {
-        this.boardImage = DrawUtil.getScaledImage(boardImage, newScale / boardScale);
+        if (boardImage != null) {
+            this.boardImage = DrawUtil.getScaledImage(boardImage, newScale / boardScale);
+        }
         this.boardScale = newScale;
     }
 
@@ -102,11 +125,10 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
         int minY = boardDimensions.getMinY();
         int maxX = boardDimensions.getMaxX();
         int maxY = boardDimensions.getMaxY();
-        this.boardImage = GraphicManager.makeFormattedImage(
+        setBoardImage(GraphicManager.makeFormattedImage(
                 (1 + (maxX - minX)) * tileSize,
                 (1 + (maxY - minY)) * tileSize
-        );
-        Graphics2D g2 = boardImage.createGraphics();
+        ));
         for (Square square : board) {
             int x = square.getX();
             int y = square.getY();
@@ -114,49 +136,45 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
             if (x < minX || x > maxX || y < minY || y > maxY) {
                 System.out.println("x=" + x + " & y=" + y + ": Square is out of bounds");
             } else {
-                g2.drawImage(
+                drawOnBoard(
                         getSquareTx(square),
                         (x - minX) * tileSize,
-                        (y - minY) * tileSize,
-                        null
+                        (y - minY) * tileSize
                 );
             }
         }
-        g2.dispose();
+    }
+
+    private synchronized void redrawBoardImage(int tileSize) {
+        BufferedImage newImage = GraphicManager.makeFormattedImage(
+                (1 + boardDimensions.getMaxX() - boardDimensions.getMinX()) * tileSize,
+                (1 + boardDimensions.getMaxY() - boardDimensions.getMinY()) * tileSize
+        );
+        Graphics2D newG2 = newImage.createGraphics();
+        int drawOffsetX = 0;
+        int drawOffsetY = 0;
+        if (boardDimensions.getMinX() < imageDimensions.getMinX()) {
+            drawOffsetX = (imageDimensions.getMinX() - boardDimensions.getMinX()) * tileSize;
+        }
+        if (boardDimensions.getMinY() < imageDimensions.getMinY()) {
+            drawOffsetY = (imageDimensions.getMinY() - boardDimensions.getMinY()) * tileSize;
+        }
+        newG2.drawImage(boardImage, drawOffsetX, drawOffsetY, null);
+        newG2.dispose();
+        setBoardImage(newImage);
+        imageDimensions.expand(boardDimensions.getMinX(), boardDimensions.getMinY());
+        imageDimensions.expand(boardDimensions.getMaxX(), boardDimensions.getMaxY());
     }
 
     public void updateImage(List<Square> squares) {
         int tileSize = getTileSize();
+        redrawBoardImage(tileSize);
 
-        if (!boardDimensions.equals(imageDimensions)) {
-            BufferedImage newImage = GraphicManager.makeFormattedImage(
-                    (1 + boardDimensions.getMaxX() - boardDimensions.getMinX()) * tileSize,
-                    (1 + boardDimensions.getMaxY() - boardDimensions.getMinY()) * tileSize
-            );
-            Graphics2D newG2 = newImage.createGraphics();
-            int drawOffsetX = 0;
-            int drawOffsetY = 0;
-            if (boardDimensions.getMinX() < imageDimensions.getMinX()) {
-                drawOffsetX = (imageDimensions.getMinX() - boardDimensions.getMinX()) * tileSize;
-            }
-            if (boardDimensions.getMinY() < imageDimensions.getMinY()) {
-                drawOffsetY = (imageDimensions.getMinY() - boardDimensions.getMinY()) * tileSize;
-            }
-            newG2.drawImage(boardImage, drawOffsetX, drawOffsetY, null);
-            newG2.dispose();
-            boardImage = newImage;
-            imageDimensions.expand(boardDimensions.getMinX(), boardDimensions.getMinY());
-            imageDimensions.expand(boardDimensions.getMaxX(), boardDimensions.getMaxY());
-        }
-
-        Graphics2D g2 = boardImage.createGraphics();
-        squares.forEach(square -> g2.drawImage(
+        threadExecutor.submit(() -> squares.forEach(square -> drawOnBoard(
                 getSquareTx(square),
                 (square.getX() - boardDimensions.getMinX()) * tileSize,
-                (square.getY() - boardDimensions.getMinY()) * tileSize,
-                null
-        ));
-        g2.dispose();
+                (square.getY() - boardDimensions.getMinY()) * tileSize
+        )));
     }
 
     @Override

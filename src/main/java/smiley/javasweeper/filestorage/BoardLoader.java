@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -39,26 +38,9 @@ public class BoardLoader {
         throw new IllegalStateException("Utility class");
     }
 
-    private static Square makeNumberSquare(String squareString) {
-        String[] squareArr = squareString.split("&");
-        Square square;
-        int x = Integer.parseInt(squareArr[1]);
-        int y = Integer.parseInt(squareArr[2]);
-        if (Objects.equals(squareArr[0], "number")) {
-            square = new NumberSquare(x, y);
-            NumberSquare numSquare = (NumberSquare) square;
-            if (Boolean.parseBoolean(squareArr[4])) {
-                numSquare.setRevealedTrue(Integer.parseInt(squareArr[5]));
-            }
-        } else if (Objects.equals(squareArr[0], "bomb")) {
-            square = new BombSquare(x, y);
-        } else {
-            throw new IllegalArgumentException("Cannot recognize square: " + squareArr[0]);
-        }
-        if (Boolean.parseBoolean(squareArr[3])) {
-            square.toggleFlagged();
-        }
-        return square;
+    public static boolean boardExists(String filename) {
+        File f = new File(filename);
+        return f.exists() && !f.isDirectory();
     }
 
     private static Square makeSquare(ByteMap byteMap) {
@@ -114,11 +96,6 @@ public class BoardLoader {
             }
             return makeBoard(Template.TOP_LEVEL.getByteMap(fis), filename);
         }
-    }
-
-    public static boolean boardExists(String filename) {
-        File f = new File(filename);
-        return f.exists() && !f.isDirectory();
     }
 
     private static void serializeSquare(Serializer serializer, Square square) {

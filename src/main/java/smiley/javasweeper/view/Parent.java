@@ -4,7 +4,7 @@ import java.util.List;
 import smiley.javasweeper.view.components.GenericComponent;
 import smiley.javasweeper.view.modals.GenericModal;
 
-public interface Parent extends GenericView {
+public interface Parent {
     GenericModal getModal();
 
     int getModalX();

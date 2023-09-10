@@ -16,6 +16,7 @@ import smiley.javasweeper.intermediary.events.file.SettingUpdatedEvent;
 import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
 import smiley.javasweeper.textures.TxLoader;
 import smiley.javasweeper.view.Child;
+import smiley.javasweeper.view.GenericView;
 import smiley.javasweeper.view.GraphicManager;
 import smiley.javasweeper.view.Parent;
 import smiley.javasweeper.view.DrawUtil;
@@ -24,7 +25,7 @@ import smiley.javasweeper.view.components.GenericComponent;
 /**
  * Represents a menu window with two areas, one upper and lower area, and border
  */
-public abstract class GenericModal implements Child, Parent, FileEventListener {
+public abstract class GenericModal implements GenericView, Child, Parent, FileEventListener {
     private BufferedImage borderImage;
     private BufferedImage upperImageBase;
     private BufferedImage lowerImageBase;
@@ -200,7 +201,6 @@ public abstract class GenericModal implements Child, Parent, FileEventListener {
         setScale(Settings.getDefault(Settings.Keys.UI_SCALE, Double.class));
     }
 
-    @Override
     public GenericModalController getController() {
         return null;
     }

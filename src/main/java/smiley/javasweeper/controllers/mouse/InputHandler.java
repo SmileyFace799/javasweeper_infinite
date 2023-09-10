@@ -45,14 +45,16 @@ public class InputHandler implements MouseListener, MouseMotionListener, KeyList
     }
 
     private void notifyControllers(Consumer<InputListener> notifier) {
-        Parent view = ViewManager.getInstance().getCurrentScreen();
-        while (view.getModal() != null) {
-            view = view.getModal();
+        Parent parent = ViewManager.getInstance().getCurrentScreen();
+        while (parent.getModal() != null) {
+            parent = parent.getModal();
         }
+
+        GenericView view = (GenericView) parent;
         if (view.getController() != null) {
             notifier.accept(view.getController());
         }
-        view.getComponents().forEach(notifier);
+        parent.getComponents().forEach(notifier);
     }
 
     public static double getClickMercyTime(int button) {

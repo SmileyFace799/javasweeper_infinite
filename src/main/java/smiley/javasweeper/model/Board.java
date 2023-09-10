@@ -167,7 +167,7 @@ public class Board implements Iterable<Square> {
 
                 numSquare.setRevealedTrue(squareNumber);
                 if (squareNumber == 0 && doMassReveal) {
-                    updatedSquares.addAll(massReveal(x, y));
+                    updatedSquares.addAll(massReveal(x, y, true));
                 }
             } else if (square instanceof BombSquare) {
                 square.setRevealedTrue();
@@ -186,13 +186,13 @@ public class Board implements Iterable<Square> {
      * @param y The y-coordinate to reveal squares around
      * @return A list of every square that was updated in the revealing process
      */
-    public List<Square> massReveal(int x, int y) {
+    public List<Square> massReveal(int x, int y, boolean onlyZeros) {
         Board revealBoard = new Board();
         revealBoard.put(x, y, get(x, y));
-        return massReveal(revealBoard, 50).stream().distinct().toList();
+        return massReveal(revealBoard, 50, onlyZeros).stream().distinct().toList();
     }
 
-    private List<Square> massReveal(Board revealBoard, int recursionCount) {
+    private List<Square> massReveal(Board revealBoard, int recursionCount, boolean onlyZeros) {
         List<Square> updatedSquares = new ArrayList<>();
         Board nextRevealBoard = new Board();
         for (Square square : revealBoard) {
@@ -207,12 +207,12 @@ public class Board implements Iterable<Square> {
                                 .stream()
                                 .map(xy -> get(xy[0], xy[1]))
                                 .toList();
-                if (recursionCount > 0 && revealSquare.getNumber()
-                        == surroundingSquares
-                        .stream()
-                        .filter(Square::isMassRevealCountable)
-                        .count()
-                ) {
+                if (recursionCount > 0 && (revealSquare.getNumber() == 0 || (
+                        !onlyZeros && revealSquare.getNumber() == surroundingSquares
+                                .stream()
+                                .filter(Square::isMassRevealCountable)
+                                .count()
+                ))) {
                     for (Square surroundingSquare : surroundingSquares) {
                         if (!nextRevealBoard.exists(surroundingSquare.getX(), surroundingSquare.getY())
                                 && !surroundingSquare.isRevealed()
@@ -230,7 +230,7 @@ public class Board implements Iterable<Square> {
             }
         }
         if (recursionCount > 0 && !nextRevealBoard.getBoardMap().isEmpty()) {
-            updatedSquares.addAll(massReveal(nextRevealBoard, recursionCount - 1));
+            updatedSquares.addAll(massReveal(nextRevealBoard, recursionCount - 1, true));
         }
         return updatedSquares.stream().distinct().toList();
     }

@@ -85,6 +85,7 @@ public class GamePanel implements FileEventListener {
                 }
             }
         });
+        gameThread.setPriority(Thread.MAX_PRIORITY);
         gameThread.start();
         FileManager.getInstance().appStarted();
     }

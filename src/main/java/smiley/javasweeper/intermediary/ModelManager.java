@@ -2,12 +2,9 @@ package smiley.javasweeper.intermediary;
 
 import java.util.ArrayList;
 import java.util.List;
-import smiley.javasweeper.intermediary.events.file.AppLaunchedEvent;
 import smiley.javasweeper.intermediary.events.file.BoardLoadedEvent;
 import smiley.javasweeper.intermediary.events.model.ModelEvent;
-import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
 import smiley.javasweeper.intermediary.events.model.SquaresUpdatedEvent;
-import smiley.javasweeper.intermediary.events.file.StartupFinishedEvent;
 import smiley.javasweeper.model.Board;
 import smiley.javasweeper.model.squares.NumberSquare;
 import smiley.javasweeper.model.squares.Square;
@@ -66,7 +63,7 @@ public class ModelManager {
                 && board.get(x, y) instanceof NumberSquare numberSquare
                 && numberSquare.isRevealed()
         ) {
-            updatedSquares.addAll(board.massReveal(x, y));
+            updatedSquares.addAll(board.massReveal(x, y, false));
         }
         notifyListeners(new SquaresUpdatedEvent(board, updatedSquares));
     }
