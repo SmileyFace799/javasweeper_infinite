@@ -189,7 +189,7 @@ public class Board implements Iterable<Square> {
     public List<Square> massReveal(int x, int y, boolean onlyZeros) {
         Board revealBoard = new Board();
         revealBoard.put(x, y, get(x, y));
-        return massReveal(revealBoard, 50, onlyZeros).stream().distinct().toList();
+        return massReveal(revealBoard, 100, onlyZeros).stream().distinct().toList();
     }
 
     private List<Square> massReveal(Board revealBoard, int recursionCount, boolean onlyZeros) {

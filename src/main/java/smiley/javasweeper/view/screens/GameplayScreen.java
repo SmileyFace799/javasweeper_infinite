@@ -69,16 +69,17 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
 
     private synchronized void drawOnBoard(BufferedImage image, int x, int y) {
         boardG2.drawImage(image, x, y, null);
+        GraphicManager.getInstance().incrementPerFrameCounter();
     }
 
-    public void setBoardScale(double newScale) {
+    public synchronized void setBoardScale(double newScale) {
         if (boardImage != null) {
-            this.boardImage = DrawUtil.getScaledImage(boardImage, newScale / boardScale);
+            setBoardImage(DrawUtil.getScaledImage(boardImage, newScale / boardScale));
         }
         this.boardScale = newScale;
     }
 
-    public int getTileSize() {
+    public synchronized int getTileSize() {
         return (int) Math.round(ORIGINAL_TILE_SIZE * boardScale);
     }
 
@@ -117,7 +118,7 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
      * Draws the initial board image.
      * Squares outside minX, minY, maxX & maxY will be out of bounds & not drawn
      */
-    private void drawInitialImage(Board board) {
+    private synchronized void drawInitialImage(Board board) {
         int tileSize = getTileSize();
         this.boardDimensions = board.getDimensions();
         this.imageDimensions = boardDimensions.copy();
@@ -129,20 +130,22 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
                 (1 + (maxX - minX)) * tileSize,
                 (1 + (maxY - minY)) * tileSize
         ));
-        for (Square square : board) {
-            int x = square.getX();
-            int y = square.getY();
+        threadExecutor.submit(() -> {
+            for (Square square : board) {
+                int x = square.getX();
+                int y = square.getY();
 
-            if (x < minX || x > maxX || y < minY || y > maxY) {
-                System.out.println("x=" + x + " & y=" + y + ": Square is out of bounds");
-            } else {
-                drawOnBoard(
-                        getSquareTx(square),
-                        (x - minX) * tileSize,
-                        (y - minY) * tileSize
-                );
+                if (x < minX || x > maxX || y < minY || y > maxY) {
+                    System.out.println("x=" + x + " & y=" + y + ": Square is out of bounds");
+                } else {
+                    drawOnBoard(
+                            getSquareTx(square),
+                            (x - minX) * getTileSize(),
+                            (y - minY) * getTileSize()
+                    );
+                }
             }
-        }
+        });
     }
 
     private synchronized void redrawBoardImage(int tileSize) {

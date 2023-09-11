@@ -53,6 +53,8 @@ public class GraphicManager implements FileEventListener {
     private int windowWidth;
     private int windowHeight;
 
+    private int perFrameCounter;
+
     private GraphicManager() {
         FileManager.getInstance().addListener(this);
 
@@ -74,6 +76,8 @@ public class GraphicManager implements FileEventListener {
         this.preferredWindowWidth = DEFAULT_WINDOW_WIDTH;
         this.preferredWindowHeight = DEFAULT_WINDOW_HEIGHT;
         resetWindowSize();
+
+        this.perFrameCounter = 0;
     }
 
     private void updateUiScale(double uiScale) {
@@ -173,12 +177,18 @@ public class GraphicManager implements FileEventListener {
         if (debugEnabled) {
             g2.setFont(DEFAULT_FONT);
             g2.setColor(Color.black);
-            g2.fillRect(0, 0, 275, 50);
+            g2.fillRect(0, 0, 275, 70);
             g2.setColor(Color.white);
             long drawTime = System.nanoTime() - drawStart;
             g2.drawString("Draw time: " + (drawTime / 1e6) + "ms", 10, 20);
             g2.drawString("Effective FPS: " + (1e9 / drawTime), 10, 40);
+            g2.drawString("Per frame counter: " + perFrameCounter, 10, 60);
         }
+        this.perFrameCounter = 0;
+    }
+
+    public void incrementPerFrameCounter() {
+        perFrameCounter++;
     }
 
     public static BufferedImage getFormattedImage(BufferedImage image) {

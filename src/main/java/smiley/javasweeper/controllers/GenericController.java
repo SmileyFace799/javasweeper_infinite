@@ -20,6 +20,8 @@ public abstract class GenericController implements InputListener {
     public void keyReleased(KeyEvent ke) {
         if (ke.getKeyCode() == KeyEvent.VK_F11) {
             FileManager.getInstance().toggleSetting(Settings.Keys.FULLSCREEN);
+        } else if (ke.getKeyCode() == KeyEvent.VK_F3) {
+            app.toggleDebug();
         }
     }
 }
