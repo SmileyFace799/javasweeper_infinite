@@ -32,11 +32,11 @@ public class GameplayController extends GenericScreenController {
     }
 
     private int getClickedColumn(int cursorX) {
-        return Math.floorDiv(cursorX + getView().getCameraOffsetX(), getView().getTileSize());
+        return Math.floorDiv(cursorX + getView().getCameraOffsetX(), getView().getBoardImage().getTileSize());
     }
 
     private int getClickedRow(int cursorY) {
-        return Math.floorDiv(cursorY + getView().getCameraOffsetY(), getView().getTileSize());
+        return Math.floorDiv(cursorY + getView().getCameraOffsetY(), getView().getBoardImage().getTileSize());
     }
 
     @Override

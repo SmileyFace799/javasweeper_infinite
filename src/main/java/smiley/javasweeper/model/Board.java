@@ -1,22 +1,14 @@
 package smiley.javasweeper.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
+import smiley.javasweeper.misc.Map2D;
 import smiley.javasweeper.model.squares.BombSquare;
 import smiley.javasweeper.model.squares.NumberSquare;
 import smiley.javasweeper.model.squares.Square;
 
-public class Board implements Iterable<Square> {
+public class Board extends Map2D<Integer, Integer, Square> {
 
-    private final Map<Integer, Map<Integer, Square>> boardMap;
-    private final Dimensions dimensions;
     private final double mineChance;
     private final String filename;
 
@@ -27,20 +19,9 @@ public class Board implements Iterable<Square> {
     }
 
     public Board(double mineChance, String filename) {
-        this.boardMap = new HashMap<>();
-        this.dimensions = new Dimensions();
         this.mineChance = mineChance;
         this.filename = filename;
         this.exploded = false;
-    }
-
-    //Accessors
-    public Map<Integer, Map<Integer, Square>> getBoardMap() {
-        return boardMap;
-    }
-
-    public Dimensions getDimensions() {
-        return dimensions;
     }
 
     public double getMineChance() {
@@ -49,20 +30,6 @@ public class Board implements Iterable<Square> {
 
     public String getFilename() {
         return filename;
-    }
-
-    public boolean exists(int x, int y) {
-        return boardMap.containsKey(x) && boardMap.get(x).containsKey(y);
-    }
-
-    public Square get(int x, int y) {
-        Square square;
-        if (exists(x, y)) {
-            square = boardMap.get(x).get(y);
-        } else {
-            square = null;
-        }
-        return square;
     }
 
     public boolean isBomb(int x, int y) {
@@ -92,17 +59,6 @@ public class Board implements Iterable<Square> {
         }
         put(x, y, square);
         return square;
-    }
-
-    public void put(int x, int y, Square square) {
-        boardMap.computeIfAbsent(x, xVal -> new HashMap<>());
-
-        if (!boardMap.get(x).containsKey(y)) {
-            boardMap.get(x).put(y, square);
-        } else {
-            System.out.println("put: A square already exists at x=" + x + " & y=" + y);
-        }
-        dimensions.expand(square.getX(), square.getY());
     }
 
     /**
@@ -157,7 +113,7 @@ public class Board implements Iterable<Square> {
             if (square instanceof NumberSquare numSquare) {
                 int squareNumber = 0;
                 for (int[] xy : getAdjacentPoints(x, y)) {
-                    if (!exists(xy[0], xy[1])) {
+                    if (!containsKey(xy[0], xy[1])) {
                         updatedSquares.add(generate(xy[0], xy[1], generateMineChance));
                     }
                     if (isBomb(xy[0], xy[1])) {
@@ -174,7 +130,6 @@ public class Board implements Iterable<Square> {
                 exploded = true;
             }
         }
-        dimensions.expand(square.getX(), square.getY());
         return updatedSquares.stream().distinct().toList();
     }
 
@@ -214,7 +169,7 @@ public class Board implements Iterable<Square> {
                                 .count()
                 ))) {
                     for (Square surroundingSquare : surroundingSquares) {
-                        if (!nextRevealBoard.exists(surroundingSquare.getX(), surroundingSquare.getY())
+                        if (!nextRevealBoard.containsKey(surroundingSquare.getX(), surroundingSquare.getY())
                                 && !surroundingSquare.isRevealed()
                                 && !surroundingSquare.isFlagged()
                         ) {
@@ -229,115 +184,9 @@ public class Board implements Iterable<Square> {
                 recursionCount = 0;
             }
         }
-        if (recursionCount > 0 && !nextRevealBoard.getBoardMap().isEmpty()) {
+        if (recursionCount > 0 && !nextRevealBoard.isEmpty()) {
             updatedSquares.addAll(massReveal(nextRevealBoard, recursionCount - 1, true));
         }
         return updatedSquares.stream().distinct().toList();
-    }
-
-    @NotNull
-    @Override
-    public Iterator<Square> iterator() {
-        return new BoardIterator();
-    }
-
-    public static class Dimensions {
-        private int minX;
-        private int minY;
-        private int maxX;
-        private int maxY;
-
-        private Dimensions() {
-            this(0, 0, 0, 0);
-        }
-
-        private Dimensions(int minX, int minY, int maxX, int maxY) {
-            this.minX = minX;
-            this.minY = minY;
-            this.maxX = maxX;
-            this.maxY = maxY;
-        }
-
-        public int getMinX() {
-            return minX;
-        }
-
-        public int getMinY() {
-            return minY;
-        }
-
-        public int getMaxX() {
-            return maxX;
-        }
-
-        public int getMaxY() {
-            return maxY;
-        }
-
-        public void expand(int newX, int newY) {
-            this.minX = Math.min(minX, newX);
-            this.minY = Math.min(minY, newY);
-            this.maxX = Math.max(maxX, newX);
-            this.maxY = Math.max(maxY, newY);
-        }
-
-        public Dimensions copy() {
-            return new Dimensions(minX, minY, maxX, maxY);
-        }
-
-        @Override
-        public String toString() {
-            return "Dimensions{" +
-                    "minX=" + minX +
-                    ", minY=" + minY +
-                    ", maxX=" + maxX +
-                    ", maxY=" + maxY +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Dimensions dimensions = (Dimensions) o;
-            return minX == dimensions.minX
-                    && minY == dimensions.minY
-                    && maxX == dimensions.maxX
-                    && maxY == dimensions.maxY;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(minX, minY, maxX, maxY);
-        }
-    }
-
-    private class BoardIterator implements Iterator<Square> {
-        private final List<Square> squares;
-
-        public BoardIterator() {
-            this.squares = boardMap
-                    .values()
-                    .stream()
-                    .flatMap(column -> column.values().stream())
-                    .collect(Collectors.toList());
-        }
-
-        @Override
-        public boolean hasNext() {
-            return !squares.isEmpty();
-        }
-
-        @Override
-        public Square next() {
-            if (!hasNext()) {
-                throw new NoSuchElementException("No squares left");
-            }
-            return squares.remove(0);
-        }
     }
 }

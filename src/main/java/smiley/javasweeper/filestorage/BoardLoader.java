@@ -82,7 +82,7 @@ public class BoardLoader {
         return board;
     }
 
-    public static Board loadBoard(String filename) throws IOException {
+    public static synchronized Board loadBoard(String filename) throws IOException {
         try (FileInputStream fis = new FileInputStream(filename)) {
             short versionBytes = ByteBuffer.wrap(fis.readNBytes(2)).getShort();
             byte majorVersion = (byte) ((versionBytes >>> 11) & 0b11111);
@@ -144,7 +144,7 @@ public class BoardLoader {
         return serializer;
     }
 
-    public static void saveBoard(Board board) throws IOException {
+    public static synchronized void saveBoard(Board board) throws IOException {
         String filename = board.getFilename();
         if (filename == null || filename.isBlank()) {
             throw new IllegalArgumentException("Board \"board\" has no filename");

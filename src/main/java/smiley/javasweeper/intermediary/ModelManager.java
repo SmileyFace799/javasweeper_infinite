@@ -37,35 +37,29 @@ public class ModelManager {
     }
 
     public void revealBoardSquare(int x, int y) {
-        List<Square> updatedSquares = new ArrayList<>();
-        if (!board.exists(x, y)) {
+        if (!board.containsKey(x, y)) {
             board.generate(x, y);
         }
         if (!board.get(x, y).isRevealed()) {
-            updatedSquares.addAll(board.reveal(x, y));
+            notifyListeners(new SquaresUpdatedEvent(board, board.reveal(x, y)));
         }
-        notifyListeners(new SquaresUpdatedEvent(board, updatedSquares));
     }
 
     public void flagBoardSquare(int x, int y) {
         Square square = board.get(x, y);
-        List<Square> updatedSquares = new ArrayList<>();
         if (square != null && !square.isRevealed()) {
             square.toggleFlagged();
-            updatedSquares.add(square);
+            notifyListeners(new SquaresUpdatedEvent(board, List.of(square)));
         }
-        notifyListeners(new SquaresUpdatedEvent(board, updatedSquares));
     }
 
     public void smartRevealSurrounding(int x, int y) {
-        List<Square> updatedSquares = new ArrayList<>();
-        if (board.exists(x, y)
+        if (board.containsKey(x, y)
                 && board.get(x, y) instanceof NumberSquare numberSquare
                 && numberSquare.isRevealed()
         ) {
-            updatedSquares.addAll(board.massReveal(x, y, false));
+            notifyListeners(new SquaresUpdatedEvent(board, board.massReveal(x, y, false)));
         }
-        notifyListeners(new SquaresUpdatedEvent(board, updatedSquares));
     }
 
     public void setBoard(Board board) {
