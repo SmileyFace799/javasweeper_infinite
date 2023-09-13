@@ -2,7 +2,7 @@ package smiley.javasweeper.view.components;
 
 import java.awt.Graphics2D;
 import java.util.List;
-import smiley.javasweeper.view.Parent;
+import smiley.javasweeper.view.interfaces.Parent;
 import smiley.javasweeper.view.modals.GenericModal;
 
 public class Box extends GenericComponent implements Parent {
@@ -53,6 +53,11 @@ public class Box extends GenericComponent implements Parent {
 
     @Override
     public void placeComponent(GenericComponent component, int x, int y) {
+
+    }
+
+    @Override
+    public void setScale(double scale) {
 
     }
 }

@@ -13,6 +13,7 @@ public class GamePanel {
 
     //CONSTANTS
     public static final int FPS = 60;
+
     private Thread gameThread;
     private boolean debugEnabled = false;
     private final JPanel jPanel = new JPanel() {

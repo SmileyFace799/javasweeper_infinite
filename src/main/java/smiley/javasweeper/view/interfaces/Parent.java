@@ -1,4 +1,4 @@
-package smiley.javasweeper.view;
+package smiley.javasweeper.view.interfaces;
 
 import java.util.List;
 import smiley.javasweeper.view.components.GenericComponent;

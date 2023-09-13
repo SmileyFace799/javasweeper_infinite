@@ -1,4 +1,4 @@
-package smiley.javasweeper.view;
+package smiley.javasweeper.view.interfaces;
 
 public interface Child {
     Parent getParent();

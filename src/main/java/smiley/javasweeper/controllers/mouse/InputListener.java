@@ -8,52 +8,52 @@ import java.awt.event.MouseMotionListener;
 
 public interface InputListener extends MouseListener, MouseMotionListener, KeyListener {
     @Override
-    default void keyTyped(KeyEvent e) {
+    default void keyTyped(KeyEvent ke) {
 
     }
 
     @Override
-    default void keyPressed(KeyEvent e) {
+    default void keyPressed(KeyEvent ke) {
 
     }
 
     @Override
-    default void keyReleased(KeyEvent e) {
+    default void keyReleased(KeyEvent ke) {
 
     }
 
     @Override
-    default void mouseClicked(MouseEvent e) {
+    default void mouseClicked(MouseEvent me) {
 
     }
 
     @Override
-    default void mousePressed(MouseEvent e) {
+    default void mousePressed(MouseEvent me) {
 
     }
 
     @Override
-    default void mouseReleased(MouseEvent e) {
+    default void mouseReleased(MouseEvent me) {
 
     }
 
     @Override
-    default void mouseEntered(MouseEvent e) {
+    default void mouseEntered(MouseEvent me) {
 
     }
 
     @Override
-    default void mouseExited(MouseEvent e) {
+    default void mouseExited(MouseEvent me) {
 
     }
 
     @Override
-    default void mouseDragged(MouseEvent e) {
+    default void mouseDragged(MouseEvent me) {
 
     }
 
     @Override
-    default void mouseMoved(MouseEvent e) {
+    default void mouseMoved(MouseEvent me) {
 
     }
 }

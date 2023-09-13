@@ -15,6 +15,7 @@ import smiley.javasweeper.intermediary.FileManager;
 import smiley.javasweeper.intermediary.events.file.FileEvent;
 import smiley.javasweeper.intermediary.events.file.SettingUpdatedEvent;
 import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
+import smiley.javasweeper.view.interfaces.Parent;
 
 public class GraphicManager implements FileEventListener {
     public static final int DEFAULT_WINDOW_WIDTH = Settings.getDefault(Settings.Keys.DISPLAY_WIDTH, Integer.class);

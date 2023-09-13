@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import smiley.javasweeper.controllers.screen.GenericScreenController;
 import smiley.javasweeper.view.GenericView;
-import smiley.javasweeper.view.Parent;
+import smiley.javasweeper.view.interfaces.Parent;
 import smiley.javasweeper.view.components.GenericComponent;
 import smiley.javasweeper.view.modals.GenericModal;
 

@@ -15,17 +15,18 @@ import smiley.javasweeper.intermediary.events.file.FileEvent;
 import smiley.javasweeper.intermediary.events.file.SettingUpdatedEvent;
 import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
 import smiley.javasweeper.textures.TxLoader;
-import smiley.javasweeper.view.Child;
+import smiley.javasweeper.view.interfaces.Child;
 import smiley.javasweeper.view.GenericView;
 import smiley.javasweeper.view.GraphicManager;
-import smiley.javasweeper.view.Parent;
+import smiley.javasweeper.view.interfaces.Parent;
 import smiley.javasweeper.view.DrawUtil;
 import smiley.javasweeper.view.components.GenericComponent;
+import smiley.javasweeper.view.interfaces.Scalable;
 
 /**
  * Represents a menu window with two areas, one upper and lower area, and border
  */
-public abstract class GenericModal implements GenericView, Child, Parent, FileEventListener {
+public abstract class GenericModal implements GenericView, Child, Parent, Scalable, FileEventListener {
     private BufferedImage borderImage;
     private BufferedImage upperImageBase;
     private BufferedImage lowerImageBase;
@@ -45,9 +46,9 @@ public abstract class GenericModal implements GenericView, Child, Parent, FileEv
     private int modalX;
     private int modalY;
 
-    private List<GenericComponent> components;
-    private Map<GenericComponent, Integer> componentsX;
-    private Map<GenericComponent, Integer> componentsY;
+    private final List<GenericComponent> components;
+    private final Map<GenericComponent, Integer> componentsX;
+    private final Map<GenericComponent, Integer> componentsY;
 
     /**
      * <b>TxMap should contain the following keys & textures:</b>
@@ -331,7 +332,16 @@ public abstract class GenericModal implements GenericView, Child, Parent, FileEv
         component.setParent(this);
     }
 
-    protected void setScale(double scale) {
+    public void placeComponentUpper(GenericComponent component, int x, int y) {
+        placeComponent(component, imageOffsetLeft + y, upperImageOffsetTop + y);
+    }
+
+    public void placeComponentLower(GenericComponent component, int x, int y) {
+        placeComponent(component, imageOffsetLeft + x, lowerImageOffsetTop + y);
+    }
+
+    @Override
+    public void setScale(double scale) {
         double scaleMultiplier = scale / this.scale;
         this.borderImage = DrawUtil.getScaledImage(borderImage, scaleMultiplier);
         this.upperImageBase = DrawUtil.getScaledImage(upperImageBase, scaleMultiplier);
@@ -347,6 +357,7 @@ public abstract class GenericModal implements GenericView, Child, Parent, FileEv
 
         this.modalX *= scaleMultiplier;
         this.modalY *= scaleMultiplier;
+        components.forEach(component -> component.setScale(scale));
         componentsX.replaceAll((c, x) -> (int) (x * scaleMultiplier));
         componentsY.replaceAll((c, y) -> (int) (y * scaleMultiplier));
 

@@ -9,10 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import smiley.javasweeper.view.GenericView;
-import smiley.javasweeper.view.Parent;
-import smiley.javasweeper.view.modals.GenericModal;
+import smiley.javasweeper.view.interfaces.Parent;
 import smiley.javasweeper.view.ViewManager;
-import smiley.javasweeper.view.screens.GenericScreen;
 
 public class InputHandler implements MouseListener, MouseMotionListener, KeyListener {
     private static InputHandler instance;
