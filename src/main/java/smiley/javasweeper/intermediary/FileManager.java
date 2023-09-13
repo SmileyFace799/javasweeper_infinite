@@ -1,8 +1,8 @@
 package smiley.javasweeper.intermediary;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import smiley.javasweeper.filestorage.Settings;
@@ -17,13 +17,13 @@ public class FileManager {
 
     private static FileManager instance;
 
-    private final List<FileEventListener> listeners;
+    private final Map<FileEventListener, Integer> listeners;
 
     private Settings settings;
 
     private FileManager() {
         this.settings = null;
-        this.listeners = new ArrayList<>();
+        this.listeners = new HashMap<>();
     }
 
     public static synchronized FileManager getInstance() {
@@ -34,11 +34,18 @@ public class FileManager {
     }
 
     public void addListener(FileEventListener listener) {
-        listeners.add(listener);
+        addListener(listener, 0);
+    }
+
+    public void addListener(FileEventListener listener, int priority) {
+        listeners.put(listener, -priority);
     }
 
     private void notifyListeners(FileEvent fe) {
-        listeners.forEach(listener -> listener.onEvent(fe));
+        listeners.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue())
+                .forEach(entry -> entry.getKey().onEvent(fe));
     }
 
     public void appStarted() {

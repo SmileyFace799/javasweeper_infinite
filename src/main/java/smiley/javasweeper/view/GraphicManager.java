@@ -1,7 +1,6 @@
 package smiley.javasweeper.view;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,13 +8,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFrame;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.intermediary.FileEventListener;
 import smiley.javasweeper.intermediary.FileManager;
 import smiley.javasweeper.intermediary.events.file.FileEvent;
 import smiley.javasweeper.intermediary.events.file.SettingUpdatedEvent;
 import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
-import smiley.javasweeper.view.screens.GenericScreen;
 
 public class GraphicManager implements FileEventListener {
     public static final int DEFAULT_WINDOW_WIDTH = Settings.getDefault(Settings.Keys.DISPLAY_WIDTH, Integer.class);
@@ -50,8 +49,7 @@ public class GraphicManager implements FileEventListener {
     private Font titleFont;
     private int preferredWindowWidth;
     private int preferredWindowHeight;
-    private int windowWidth;
-    private int windowHeight;
+    private JFrame window;
 
     private int perFrameCounter;
 
@@ -75,7 +73,6 @@ public class GraphicManager implements FileEventListener {
 
         this.preferredWindowWidth = DEFAULT_WINDOW_WIDTH;
         this.preferredWindowHeight = DEFAULT_WINDOW_HEIGHT;
-        resetWindowSize();
 
         this.perFrameCounter = 0;
     }
@@ -108,6 +105,13 @@ public class GraphicManager implements FileEventListener {
         return numberColors.get(number);
     }
 
+    public void setWindow(JFrame window) {
+        if (window == null) {
+            throw new IllegalArgumentException("Window \"window\" cannot be null");
+        }
+        this.window = window;
+    }
+
     public int getMargin() {
         return margin;
     }
@@ -128,25 +132,29 @@ public class GraphicManager implements FileEventListener {
         return titleFont;
     }
 
-    public int getPreferredWindowWidth() {
-        return preferredWindowWidth;
-    }
-
-    public int getPreferredWindowHeight() {
-        return preferredWindowHeight;
-    }
-
     public int getWindowWidth() {
-        return windowWidth;
+        return window.getBounds().width;
     }
 
     public int getWindowHeight() {
-        return windowHeight;
+        return window.getBounds().height;
+    }
+
+    private boolean isFullscreen() {
+        return window.equals(GraphicManager.GRAPHICS_DEVICE.getFullScreenWindow());
+    }
+
+    private void setFullscreen(boolean fullscreen) {
+        if (fullscreen != isFullscreen()) {
+            window.dispose();
+            window.setUndecorated(fullscreen);
+            GRAPHICS_DEVICE.setFullScreenWindow(fullscreen ? window : null);
+            window.setVisible(true);
+        }
     }
 
     public void setWindowSize(int width, int height) {
-        this.windowWidth = width;
-        this.windowHeight = height;
+        window.setSize(new Dimension(width, height));
     }
 
     public void resetWindowSize() {
@@ -217,12 +225,26 @@ public class GraphicManager implements FileEventListener {
             updateUiScale(settings.getUiScale());
             this.preferredWindowWidth = settings.getDisplayWidth();
             this.preferredWindowHeight = settings.getDisplayHeight();
-            resetWindowSize();
+            setFullscreen(settings.isFullscreen());
         } else if (fe instanceof SettingUpdatedEvent sue) {
             switch (sue.setting()) {
-                case (Settings.Keys.DISPLAY_WIDTH) -> setWindowSize(sue.value(Integer.class), getWindowHeight());
-                case (Settings.Keys.DISPLAY_HEIGHT) -> setWindowSize(getWindowWidth(), sue.value(Integer.class));
-                case (Settings.Keys.UI_SCALE) -> updateUiScale(sue.value(Double.class));
+                case Settings.Keys.DISPLAY_WIDTH -> {
+                    this.preferredWindowWidth = sue.value(Integer.class);
+                    if (!isFullscreen()) {
+                        setWindowSize(preferredWindowWidth, getWindowHeight());
+                    }
+                }
+                case Settings.Keys.DISPLAY_HEIGHT -> {
+                    this.preferredWindowHeight = sue.value(Integer.class);
+                    if (!isFullscreen()) {
+                        setWindowSize(getWindowWidth(), preferredWindowHeight);
+                    }
+                }
+                case Settings.Keys.UI_SCALE -> updateUiScale(sue.value(Double.class));
+                case (Settings.Keys.FULLSCREEN) -> setFullscreen(sue.value(Boolean.class));
+                default -> {
+                    //Do nothing
+                }
             }
         }
     }
