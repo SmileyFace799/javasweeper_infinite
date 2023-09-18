@@ -3,8 +3,10 @@ package smiley.javasweeper.view.screens;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -75,21 +77,24 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
 
     @Override
     public void draw(Graphics2D g2) {
-        for (BoardImage.Chunk chunk : boardImage.stream().toList()) {
+        boardImage.stream().toList().forEach(chunk -> {
             int chunkX = chunk.getX();
             int chunkY = chunk.getY();
             if (chunkX < GraphicManager.getInstance().getWindowWidth() + cameraOffsetX
                     && chunkX + chunk.getWidth() > cameraOffsetX
                     && chunkY < GraphicManager.getInstance().getWindowHeight() + cameraOffsetY
-                    && chunkY + chunk.getHeight()> cameraOffsetY
+                    && chunkY + chunk.getHeight() > cameraOffsetY
             ) {
+                if (!chunk.isDrawn()) {
+                    chunk.drawInitial();
+                }
                 g2.drawImage(chunk.getImage(),
                         chunkX - cameraOffsetX,
                         chunkY - cameraOffsetY,
                         null
                 );
             }
-        }
+        });
     }
 
     @Override
@@ -194,22 +199,18 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
         }
 
         public void drawSquares(List<Square> squares) {
-            threadExecutor.submit(() -> {
-                for (Square square : squares) {
-                    int chunkX = Math.floorDiv(square.getX(), Chunk.CHUNK_WIDTH);
-                    int chunkY = Math.floorDiv(square.getY(), Chunk.CHUNK_HEIGHT);
+            threadExecutor.submit(() -> squares.forEach(square -> {
+                int chunkX = Math.floorDiv(square.getX(), Chunk.CHUNK_WIDTH);
+                int chunkY = Math.floorDiv(square.getY(), Chunk.CHUNK_HEIGHT);
 
-                    computeIfAbsent(chunkX, chunkY, Chunk::new);
-                    get(chunkX, chunkY).drawSquare(square);
-                }
-            });
+                computeIfAbsent(chunkX, chunkY, Chunk::new);
+                get(chunkX, chunkY).drawSquare(square);
+            }));
         }
 
         public synchronized void setScale(double scale) {
             double scaleMultiplier = scale / this.scale;
-            for (Chunk chunk : this) {
-                chunk.scale(scaleMultiplier);
-            }
+            forEach(chunk -> chunk.scale(scaleMultiplier));
             this.scale = scale;
             this.tileSize = (int) Math.round(ORIGINAL_TILE_SIZE * scale);
         }
@@ -237,6 +238,7 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
             private int width;
             private int height;
             private BufferedImage image;
+            private Queue<Square> drawBuffer;
 
             public Chunk(int chunkX, int chunkY) {
                 width = CHUNK_WIDTH * getTileSize();
@@ -245,13 +247,14 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
                 this.top = chunkY * height;
                 this.left = chunkX * width;
                 this.image = GraphicManager.makeFormattedImage(width, height);
+                this.drawBuffer = new LinkedList<>();
             }
 
-            public synchronized int getX() {
+            public int getX() {
                 return left;
             }
 
-            public synchronized int getY() {
+            public int getY() {
                 return top;
             }
 
@@ -263,8 +266,21 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
                 return height;
             }
 
-            public synchronized BufferedImage getImage() {
+            public BufferedImage getImage() {
                 return image;
+            }
+
+            public boolean isDrawn() {
+                return drawBuffer == null;
+            }
+
+            public void drawInitial() {
+                if (drawBuffer == null) {
+                    throw new IllegalStateException("This chunk is already drawn");
+                }
+                Queue<Square> buffer = drawBuffer;
+                drawBuffer = null;
+                threadExecutor.submit(() -> buffer.forEach(this::drawSquare));
             }
 
             private BufferedImage getSquareTx(Square square) {
@@ -286,12 +302,16 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
             }
 
             public synchronized void drawSquare(Square square) {
-                int x = square.getX() * getTileSize() - left;
-                int y = square.getY() * getTileSize() - top;
-                Graphics2D g2 = image.createGraphics();
-                g2.drawImage(getSquareTx(square), x, y, null);
-                g2.dispose();
-                GraphicManager.getInstance().incrementPerFrameCounter();
+                if (drawBuffer == null) {
+                    int x = square.getX() * getTileSize() - left;
+                    int y = square.getY() * getTileSize() - top;
+                    Graphics2D g2 = image.createGraphics();
+                    g2.drawImage(getSquareTx(square), x, y, null);
+                    g2.dispose();
+                    GraphicManager.getInstance().incrementPerFrameCounter();
+                } else {
+                    drawBuffer.add(square);
+                }
             }
 
             public synchronized void scale(double scaleMultiplier) {
