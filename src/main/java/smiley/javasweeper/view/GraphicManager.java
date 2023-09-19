@@ -15,7 +15,6 @@ import smiley.javasweeper.intermediary.FileManager;
 import smiley.javasweeper.intermediary.events.file.FileEvent;
 import smiley.javasweeper.intermediary.events.file.SettingUpdatedEvent;
 import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
-import smiley.javasweeper.view.interfaces.Parent;
 
 public class GraphicManager implements FileEventListener {
     public static final int DEFAULT_WINDOW_WIDTH = Settings.getDefault(Settings.Keys.DISPLAY_WIDTH, Integer.class);
@@ -176,10 +175,9 @@ public class GraphicManager implements FileEventListener {
         long drawStart = System.nanoTime();
         GenericView view = ViewManager.getInstance().getCurrentScreen();
         while (view != null) {
-            view.draw(g2);
-            Parent parentView = (Parent) view;
-            parentView.getComponents().forEach(component -> component.draw(g2));
-            view = parentView.getModal();
+            System.out.println(view);
+            view.repaint();
+            view = view.getModal();
 
         }
 

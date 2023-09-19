@@ -34,10 +34,10 @@ public class StartupScreen extends GenericScreen implements FileEventListener {
     }
 
     @Override
-    public void draw(Graphics2D g2) {
-        g2.setFont(GraphicManager.getInstance().getTitleFont());
-        g2.setColor(Color.WHITE);
-        DrawUtil.drawStringCentered(g2, statusString);
+    public void paintComponent(Graphics g) {
+        g.setFont(GraphicManager.getInstance().getTitleFont());
+        g.setColor(Color.WHITE);
+        DrawUtil.drawStringCentered(g, statusString);
     }
 
     @Override

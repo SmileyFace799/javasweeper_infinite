@@ -7,13 +7,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
-import smiley.javasweeper.view.GenericView;
-import smiley.javasweeper.view.interfaces.Parent;
-import smiley.javasweeper.view.ViewManager;
 
 public class InputHandler implements MouseListener, MouseMotionListener, KeyListener {
-    private static InputHandler instance;
 
     private static final Map<Integer, Double> CLICK_MERCY_TIME = Map.of(
             MouseEvent.BUTTON1, 0.2,
@@ -23,36 +18,11 @@ public class InputHandler implements MouseListener, MouseMotionListener, KeyList
 
     private final Map<Integer, Long> pressTimes;
 
-    private InputHandler() {
+    public InputHandler() {
         pressTimes = new HashMap<>();
         pressTimes.put(MouseEvent.BUTTON1, -1L);
         pressTimes.put(MouseEvent.BUTTON2, -1L);
         pressTimes.put(MouseEvent.BUTTON3, -1L);
-    }
-
-    /**
-     * Singleton.
-     *
-     * @return Singleton instance
-     */
-    public static synchronized InputHandler getInstance() {
-        if (instance == null) {
-            instance = new InputHandler();
-        }
-        return instance;
-    }
-
-    private void notifyControllers(Consumer<InputListener> notifier) {
-        Parent parent = ViewManager.getInstance().getCurrentScreen();
-        while (parent.getModal() != null) {
-            parent = parent.getModal();
-        }
-
-        GenericView view = (GenericView) parent;
-        if (view.getController() != null) {
-            notifier.accept(view.getController());
-        }
-        parent.getComponents().forEach(notifier);
     }
 
     public static double getClickMercyTime(int button) {
@@ -71,50 +41,48 @@ public class InputHandler implements MouseListener, MouseMotionListener, KeyList
     @Override
     public void mousePressed(MouseEvent me) {
         pressTimes.put(me.getButton(), System.nanoTime());
-        notifyControllers(listener -> listener.mousePressed(me));
     }
 
     @Override
     public void mouseReleased(MouseEvent me) {
         if (clickTimePassed(me.getButton()) < getClickMercyTime(MouseEvent.BUTTON2)) {
-            notifyControllers(listener -> listener.mouseClicked(me));
+            mouseClicked(me);
         }
-        notifyControllers(listener -> listener.mouseReleased(me));
         pressTimes.put(me.getButton(), -1L);
     }
 
     @Override
     public void mouseEntered(MouseEvent me) {
-        notifyControllers(listener -> listener.mouseEntered(me));
+        //Do nothing
     }
 
     @Override
     public void mouseExited(MouseEvent me) {
-        notifyControllers(listener -> listener.mouseExited(me));
+        //Do nothing
     }
 
     @Override
     public void mouseDragged(MouseEvent me) {
-        notifyControllers(listeners -> listeners.mouseDragged(me));
+        //Do nothing
     }
 
     @Override
     public void mouseMoved(MouseEvent me) {
-        notifyControllers(listener -> listener.mouseMoved(me));
+        //Do nothing
     }
 
     @Override
     public void keyTyped(KeyEvent ke) {
-        notifyControllers(listener -> listener.keyTyped(ke));
+        //Do nothing
     }
 
     @Override
     public void keyPressed(KeyEvent ke) {
-        notifyControllers(listener -> listener.keyPressed(ke));
+        //Do nothing
     }
 
     @Override
     public void keyReleased(KeyEvent ke) {
-        notifyControllers(listener -> listener.keyReleased(ke));
+        //Do nothing
     }
 }

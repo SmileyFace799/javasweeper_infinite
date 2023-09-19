@@ -5,9 +5,7 @@ import java.awt.event.MouseEvent;
 import smiley.javasweeper.controllers.mouse.InputHandler;
 import smiley.javasweeper.intermediary.ModelManager;
 import smiley.javasweeper.view.GamePanel;
-import smiley.javasweeper.view.GraphicManager;
 import smiley.javasweeper.view.ViewManager;
-import smiley.javasweeper.view.DrawUtil;
 import smiley.javasweeper.view.modals.PauseModal;
 import smiley.javasweeper.view.screens.GameplayScreen;
 
@@ -80,7 +78,7 @@ public class GameplayController extends GenericScreenController {
     @Override
     public void mouseDragged(MouseEvent me) {
         if (isCameraBeingMoved
-                && InputHandler.getInstance().clickTimePassed(MouseEvent.BUTTON2)
+                && clickTimePassed(MouseEvent.BUTTON2)
                 >= InputHandler.getClickMercyTime(MouseEvent.BUTTON2) / 2
         ) {
             int cameraMoveDx = cameraMoveReferenceX - me.getX();
@@ -99,16 +97,9 @@ public class GameplayController extends GenericScreenController {
         super.keyReleased(ke);
         if (ke.getKeyCode() == KeyEvent.VK_ESCAPE) {
             PauseModal pauseModal = ViewManager.getInstance().getmodal(PauseModal.class);
-            getView().placeModal(pauseModal,
-                    DrawUtil.getCenteredX(
-                            GraphicManager.getInstance().getWindowWidth(),
-                            pauseModal.getWidth()
-                    ),
-                    DrawUtil.getCenteredY(
-                            GraphicManager.getInstance().getWindowHeight(),
-                            pauseModal.getHeight()
-                    )
-            );
+            pauseModal.setAlignmentX(0.5F);
+            pauseModal.setAlignmentY(0.5F);
+            getView().setModal(pauseModal);
         }
     }
 }

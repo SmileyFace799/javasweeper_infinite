@@ -1,5 +1,6 @@
 package smiley.javasweeper.view.screens;
 
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -45,6 +46,7 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
     public GameplayScreen(GamePanel app) {
         super();
         this.controller = new GameplayController(this, app);
+        setControllerAsInputListener();
         this.boardImage = new BoardImage();
         this.cameraOffsetX = 0;
         this.cameraOffsetY = 0;
@@ -76,7 +78,9 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
     }
 
     @Override
-    public void draw(Graphics2D g2) {
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
         boardImage.stream().toList().forEach(chunk -> {
             int chunkX = chunk.getX();
             int chunkY = chunk.getY();

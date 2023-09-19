@@ -2,6 +2,7 @@ package smiley.javasweeper.controllers.modal;
 
 import java.awt.event.KeyEvent;
 import smiley.javasweeper.view.GamePanel;
+import smiley.javasweeper.view.GenericView;
 import smiley.javasweeper.view.modals.PauseModal;
 
 public class PauseController extends GenericModalController{
@@ -21,7 +22,7 @@ public class PauseController extends GenericModalController{
     public void keyReleased(KeyEvent ke) {
         super.keyReleased(ke);
         if (ke.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            getView().getParent().closeModal();
+            ((GenericView) getView().getParent()).removeModal();
         }
     }
 }

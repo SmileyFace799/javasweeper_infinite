@@ -1,15 +1,30 @@
 package smiley.javasweeper.view;
 
-import java.awt.Graphics2D;
+import javax.swing.JPanel;
 import smiley.javasweeper.controllers.GenericController;
+import smiley.javasweeper.view.modals.GenericModal;
 
-public interface GenericView {
-    GenericController getController();
+public abstract class GenericView extends JPanel {
+    private GenericModal modal;
 
-    /**
-     * Draws this screen.
-     *
-     * @param g2 The {@link Graphics2D} object to draw to
-     */
-    void draw(Graphics2D g2);
+    public abstract GenericController getController();
+
+    protected void setControllerAsInputListener() {
+        GenericController controller = getController();
+        addKeyListener(controller);
+        addMouseListener(controller);
+        addMouseMotionListener(controller);
+    }
+
+    public GenericModal getModal() {
+        return modal;
+    }
+
+    public void setModal(GenericModal modal) {
+        this.modal = modal;
+    }
+
+    public void removeModal() {
+        setModal(null);
+    }
 }

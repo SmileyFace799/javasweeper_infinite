@@ -1,10 +1,11 @@
 package smiley.javasweeper.view;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
-import smiley.javasweeper.controllers.mouse.InputHandler;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.intermediary.FileManager;
 import smiley.javasweeper.view.screens.StartupScreen;
@@ -33,9 +34,26 @@ public class GamePanel {
         jPanel.setDoubleBuffered(true);
         jPanel.setFocusable(true);
         jPanel.setBackground(Color.black);
-        jPanel.addMouseListener(InputHandler.getInstance());
-        jPanel.addMouseMotionListener(InputHandler.getInstance());
-        jPanel.addKeyListener(InputHandler.getInstance());
+        jPanel.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent ke) {
+                //Do nothing
+            }
+
+            @Override
+            public void keyPressed(KeyEvent ke) {
+                //Do nothing
+            }
+
+            @Override
+            public void keyReleased(KeyEvent ke) {
+                if (ke.getKeyCode() == KeyEvent.VK_F11) {
+                    FileManager.getInstance().toggleSetting(Settings.Keys.FULLSCREEN);
+                } else if (ke.getKeyCode() == KeyEvent.VK_F3) {
+                    toggleDebug();
+                }
+            }
+        });
         jPanel.setPreferredSize(new Dimension(
                 Settings.getDefault(Settings.Keys.DISPLAY_WIDTH, Integer.class),
                 Settings.getDefault(Settings.Keys.DISPLAY_HEIGHT, Integer.class)

@@ -1,12 +1,11 @@
 package smiley.javasweeper.view.modals;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.swing.JPanel;
 import smiley.javasweeper.controllers.modal.GenericModalController;
 import smiley.javasweeper.filestorage.Settings;
 import smiley.javasweeper.intermediary.FileEventListener;
@@ -15,40 +14,30 @@ import smiley.javasweeper.intermediary.events.file.FileEvent;
 import smiley.javasweeper.intermediary.events.file.SettingUpdatedEvent;
 import smiley.javasweeper.intermediary.events.file.SettingsLoadedEvent;
 import smiley.javasweeper.textures.TxLoader;
-import smiley.javasweeper.view.interfaces.Child;
+import smiley.javasweeper.view.DrawUtil;
 import smiley.javasweeper.view.GenericView;
 import smiley.javasweeper.view.GraphicManager;
-import smiley.javasweeper.view.interfaces.Parent;
-import smiley.javasweeper.view.DrawUtil;
-import smiley.javasweeper.view.components.GenericComponent;
 import smiley.javasweeper.view.interfaces.Scalable;
 
 /**
  * Represents a menu window with two areas, one upper and lower area, and border
  */
-public abstract class GenericModal implements GenericView, Child, Parent, Scalable, FileEventListener {
+public abstract class GenericModal extends GenericView implements Scalable, FileEventListener {
     private BufferedImage borderImage;
-    private BufferedImage upperImageBase;
-    private BufferedImage lowerImageBase;
+    private JPanel upperPanel;
+    private JPanel lowerPanel;
     private int imageOffsetLeft;
     private int upperImageOffsetTop;
     private int lowerImageOffsetTop;
     private int innerWidth;
     private int upperHeight;
     private int lowerHeight;
-    private int width;
-    private int height;
 
     private double scale;
-    private Parent parent;
 
     private GenericModal modal;
     private int modalX;
     private int modalY;
-
-    private final List<GenericComponent> components;
-    private final Map<GenericComponent, Integer> componentsX;
-    private final Map<GenericComponent, Integer> componentsY;
 
     /**
      * <b>TxMap should contain the following keys & textures:</b>
@@ -131,32 +120,28 @@ public abstract class GenericModal implements GenericView, Child, Parent, Scalab
         BufferedImage bottomLeftEdge = Textures.BOTTOM_LEFT_EDGE.get(1);
         BufferedImage bottomRightEdge = Textures.BOTTOM_RIGHT_EDGE.get(1);
 
-        this.width = topLeftCorner.getWidth()
-                + innerWidth
-                + topRightCorner.getWidth();
-        this.height = topLeftCorner.getHeight()
-                + upperHeight
-                + midLeftCorner.getHeight()
-                + lowerHeight
-                + bottomLeftCorner.getHeight();
+        this.setSize(
+                topLeftCorner.getWidth()
+                        + innerWidth
+                        + topRightCorner.getWidth(),
+                topLeftCorner.getHeight()
+                        + upperHeight
+                        + midLeftCorner.getHeight()
+                        + lowerHeight
+                        + bottomLeftCorner.getHeight()
+        );
         this.imageOffsetLeft = topLeftCorner.getWidth();
         this.upperImageOffsetTop = topLeftCorner.getHeight();
         this.lowerImageOffsetTop = topLeftCorner.getHeight() + upperHeight + midLeftCorner.getHeight();
 
-        this.borderImage = GraphicManager.makeFormattedImage(width, height);
-        this.upperImageBase = GraphicManager.makeFormattedImage(innerWidth, upperHeight);
-        this.lowerImageBase = GraphicManager.makeFormattedImage(innerWidth, lowerHeight);
+        this.borderImage = GraphicManager.makeFormattedImage(getWidth(), getHeight());
 
-        //Drawing upper & lower image base
-        Graphics2D upperG2 = upperImageBase.createGraphics();
-        upperG2.setPaint(new Color(189, 189, 189));
-        upperG2.fillRect(0, 0, innerWidth, upperHeight);
-        upperG2.dispose();
-
-        Graphics2D lowerG2 = lowerImageBase.createGraphics();
-        lowerG2.setPaint(new Color(189, 189, 189));
-        lowerG2.fillRect(0, 0, innerWidth, lowerHeight);
-        lowerG2.dispose();
+        this.upperPanel = new JPanel();
+        upperPanel.setSize(innerWidth, upperHeight);
+        upperPanel.setBackground(new Color(189, 189, 189));
+        this.lowerPanel = new JPanel();
+        lowerPanel.setSize(innerWidth, lowerHeight);
+        lowerPanel.setBackground(new Color(189, 189, 189));
 
         //Drawing the border's corners
         Graphics2D borderG2 = borderImage.createGraphics();
@@ -171,7 +156,7 @@ public abstract class GenericModal implements GenericView, Child, Parent, Scalab
         borderG2.drawImage(bottomRightCorner, bottomLeftCorner.getWidth() + innerWidth,
                 topRightCorner.getHeight() + upperHeight + midRightCorner.getHeight() + lowerHeight, null);
 
-        //Drawing the border's  edges
+        //Drawing the border's edges
         for (int i = 0; i < innerWidth; i++) {
             borderG2.drawImage(topEdge, topLeftCorner.getWidth() + i, 0, null);
             borderG2.drawImage(midEdge, midLeftCorner.getWidth() + i,
@@ -192,11 +177,6 @@ public abstract class GenericModal implements GenericView, Child, Parent, Scalab
         }
 
         borderG2.dispose();
-        this.parent = null;
-
-        this.components = new ArrayList<>();
-        this.componentsX = new HashMap<>();
-        this.componentsY = new HashMap<>();
 
         this.scale = 1;
         setScale(Settings.getDefault(Settings.Keys.UI_SCALE, Double.class));
@@ -204,14 +184,6 @@ public abstract class GenericModal implements GenericView, Child, Parent, Scalab
 
     public GenericModalController getController() {
         return null;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     public int getInnerWidth() {
@@ -226,140 +198,26 @@ public abstract class GenericModal implements GenericView, Child, Parent, Scalab
         return lowerHeight;
     }
 
-    protected abstract void draw(Graphics2D upperG2, Graphics2D lowerG2);
+    protected abstract void paintComponent(Graphics2D upperG2, Graphics2D lowerG2);
 
     @Override
-    public void draw(Graphics2D g2) {
-        g2.drawImage(borderImage, getParentX(), getParentY(), null);
-        BufferedImage upperImage = GraphicManager.getFormattedImage(upperImageBase);
-        BufferedImage lowerImage = GraphicManager.getFormattedImage(lowerImageBase);
-        Graphics2D upperG2 = upperImage.createGraphics();
-        Graphics2D lowerG2 = lowerImage.createGraphics();
-        upperG2.setColor(Color.BLACK);
-        lowerG2.setColor(Color.BLACK);
-        draw(upperG2, lowerG2);
-        upperG2.dispose();
-        lowerG2.dispose();
-        g2.drawImage(upperImage,
-                getParentX() + imageOffsetLeft,
-                getParentY() + upperImageOffsetTop,
-                null
-        );
-        g2.drawImage(lowerImage,
-                getParentX() + imageOffsetLeft,
-                getParentY() + lowerImageOffsetTop,
-                null
-        );
-    }
-
-    @Override
-    public Parent getParent() {
-        return parent;
-    }
-
-    @Override
-    public void setParent(Parent parent) {
-        this.parent = parent;
-    }
-
-    @Override
-    public int getParentX() {
-        return getParent().getModalX();
-    }
-
-    @Override
-    public int getParentY() {
-        return getParent().getModalY();
-    }
-
-    @Override
-    public GenericModal getModal() {
-        return modal;
-    }
-
-    @Override
-    public int getModalX() {
-        return getParentX() + modalX;
-    }
-
-    @Override
-    public int getModalY() {
-        return getParentY() + modalY;
-    }
-
-    @Override
-    public void placeModal(GenericModal modal, int x, int y) {
-        if (modal.getParent() != null) {
-            throw new IllegalArgumentException("modal already has a parent");
-        }
-        this.modal = modal;
-        this.modalX = x;
-        this.modalY = y;
-        modal.setParent(this);
-    }
-
-    @Override
-    public void closeModal() {
-        modal.setParent(null);
-        this.modal = null;
-        this.modalX = 0;
-        this.modalY = 0;
-    }
-
-    @Override
-    public List<GenericComponent> getComponents() {
-        return components;
-    }
-
-    @Override
-    public int getComponentX(GenericComponent component) {
-        return getParentX() + componentsX.get(component);
-    }
-
-    @Override
-    public int getComponentY(GenericComponent component) {
-        return getParentY() + componentsY.get(component);
-    }
-
-    @Override
-    public void placeComponent(GenericComponent component, int x, int y) {
-        if (component.getParent() != null) {
-            throw new IllegalArgumentException("component already has a parent");
-        }
-        components.add(component);
-        componentsX.put(component, x);
-        componentsY.put(component, y);
-        component.setParent(this);
-    }
-
-    public void placeComponentUpper(GenericComponent component, int x, int y) {
-        placeComponent(component, imageOffsetLeft + y, upperImageOffsetTop + y);
-    }
-
-    public void placeComponentLower(GenericComponent component, int x, int y) {
-        placeComponent(component, imageOffsetLeft + x, lowerImageOffsetTop + y);
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        getGraphics().drawImage(borderImage, 0, 0, null);
     }
 
     @Override
     public void setScale(double scale) {
         double scaleMultiplier = scale / this.scale;
         this.borderImage = DrawUtil.getScaledImage(borderImage, scaleMultiplier);
-        this.upperImageBase = DrawUtil.getScaledImage(upperImageBase, scaleMultiplier);
-        this.lowerImageBase = DrawUtil.getScaledImage(lowerImageBase, scaleMultiplier);
         this.imageOffsetLeft *= scaleMultiplier;
         this.upperImageOffsetTop *= scaleMultiplier;
         this.lowerImageOffsetTop *= scaleMultiplier;
         this.innerWidth *= scaleMultiplier;
         this.upperHeight *= scaleMultiplier;
         this.lowerHeight *= scaleMultiplier;
-        this.width *= scaleMultiplier;
-        this.height *= scaleMultiplier;
-
-        this.modalX *= scaleMultiplier;
-        this.modalY *= scaleMultiplier;
-        components.forEach(component -> component.setScale(scale));
-        componentsX.replaceAll((c, x) -> (int) (x * scaleMultiplier));
-        componentsY.replaceAll((c, y) -> (int) (y * scaleMultiplier));
+        Dimension size = getSize();
+        this.setSize((int) (size.getWidth() * scaleMultiplier), (int) (size.getHeight() * scaleMultiplier));
 
         this.scale = scale;
     }
