@@ -2,8 +2,8 @@ package smiley.javasweeper.view;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
-import smiley.javasweeper.view.GraphicManager;
 
 public class DrawUtil {
     private DrawUtil() {
@@ -27,6 +27,19 @@ public class DrawUtil {
         g2.drawImage(image, 0, 0, newBoardImage.getWidth(), newBoardImage.getHeight(), null);
         g2.dispose();
         return newBoardImage;
+    }
+
+    public static BufferedImage getAlteredCopy(BufferedImage baseImage, Consumer<Graphics2D> drawer) {
+        BufferedImage image = GraphicManager.makeFormattedImage(baseImage.getWidth(), baseImage.getHeight());
+        Graphics2D imageG2 = image.createGraphics();
+        imageG2.drawImage(baseImage, 0, 0, null);
+        drawer.accept(imageG2);
+        imageG2.dispose();
+        return image;
+    }
+
+    public static BufferedImage getImageCopy(BufferedImage image) {
+        return getAlteredCopy(image, g2 -> {});
     }
 
     /**

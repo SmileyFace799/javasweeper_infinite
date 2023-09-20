@@ -18,12 +18,12 @@ public abstract class GenericComponent implements InputListener, Scalable, Child
 
     @Override
     public int getParentX() {
-        return getParent().getComponentX(this);
+        return parent == null ? 0 : getParent().getComponentX(this);
     }
 
     @Override
     public int getParentY() {
-        return getParent().getComponentY(this);
+        return parent == null ? 0 : getParent().getComponentY(this);
     }
 
     @Override

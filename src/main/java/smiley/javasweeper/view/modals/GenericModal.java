@@ -264,12 +264,12 @@ public abstract class GenericModal implements GenericView, Child, Parent, Scalab
 
     @Override
     public int getParentX() {
-        return getParent().getModalX();
+        return parent == null ? 0 : getParent().getModalX();
     }
 
     @Override
     public int getParentY() {
-        return getParent().getModalY();
+        return parent == null ? 0 : getParent().getModalY();
     }
 
     @Override
@@ -333,7 +333,7 @@ public abstract class GenericModal implements GenericView, Child, Parent, Scalab
     }
 
     public void placeComponentUpper(GenericComponent component, int x, int y) {
-        placeComponent(component, imageOffsetLeft + y, upperImageOffsetTop + y);
+        placeComponent(component, imageOffsetLeft + x, upperImageOffsetTop + y);
     }
 
     public void placeComponentLower(GenericComponent component, int x, int y) {

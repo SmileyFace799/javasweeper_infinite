@@ -1,8 +1,6 @@
 package smiley.javasweeper.view.modals;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import smiley.javasweeper.MainApp;
 import smiley.javasweeper.controllers.modal.PauseController;
 import smiley.javasweeper.view.GamePanel;
 import smiley.javasweeper.view.GraphicManager;
@@ -21,35 +19,29 @@ public class PauseModal extends GenericModal {
         );
         this.controller = new PauseController(this, app);
 
-        int left = GraphicManager.getInstance().getMargin();
-        int buttonWidth = INNER_BASE_WIDTH - left * 2;
-        int buttonHeight = GraphicManager.getInstance().getTextFontSize();
+        int margin = GraphicManager.getInstance().getMargin();
+        int buttonWidth = INNER_BASE_WIDTH - margin * 2;
+        int buttonHeight = GraphicManager.getInstance().getTextFontSize() + margin * 2;
 
-        int top = left;
-        Button resumeButton = new Button(() -> {
-            BufferedImage image = GraphicManager.makeFormattedImage(buttonWidth, buttonHeight);
-            Graphics2D g2 = image.createGraphics();
+        int top = margin;
+        Button resumeButton = new Button(buttonWidth, buttonHeight);
+        resumeButton.setOnDraw((g2, scale) -> {
             g2.setFont(GraphicManager.getInstance().getTextFont());
             g2.setColor(GraphicManager.getNumberColor(1));
-            DrawUtil.drawStringCenteredX(g2, "RESUME", buttonHeight, buttonWidth);
-            g2.dispose();
-            return image;
+            DrawUtil.drawStringCenteredX(g2, "RESUME", (int) ((buttonHeight - margin) * scale), (int) (buttonWidth * scale));
         });
         resumeButton.setOnClick(ie -> getParent().closeModal());
-        placeComponentLower(resumeButton, left, top);
+        placeComponentLower(resumeButton, margin, top);
 
-        top += left + buttonHeight;
-        Button quitGameButton = new Button(() -> {
-            BufferedImage image = GraphicManager.makeFormattedImage(buttonWidth, buttonHeight);
-            Graphics2D g2 = image.createGraphics();
+        top += buttonHeight;
+        Button quitGameButton = new Button(buttonWidth, buttonHeight);
+        quitGameButton.setOnDraw((g2, scale) -> {
             g2.setFont(GraphicManager.getInstance().getTextFont());
             g2.setColor(GraphicManager.getNumberColor(3));
-            DrawUtil.drawStringCenteredX(g2, "QUIT GAME", buttonHeight, buttonWidth);
-            g2.dispose();
-            return image;
+            DrawUtil.drawStringCenteredX(g2, "QUIT GAME", (int) ((buttonHeight - margin) * scale), (int) (buttonWidth * scale));
         });
         quitGameButton.setOnClick(ie -> System.exit(0));
-        placeComponentLower(quitGameButton, left, top);
+        placeComponentLower(quitGameButton, margin, top);
     }
 
     @Override
