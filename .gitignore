@@ -32,3 +32,4 @@ bin/
 ### Custom ###
 target/
 *.board
+*.iml

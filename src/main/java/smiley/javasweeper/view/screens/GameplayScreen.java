@@ -301,7 +301,7 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
                 return tx;
             }
 
-            public synchronized void drawSquare(Square square) {
+            private synchronized void drawSquare(Square square) {
                 if (drawBuffer == null) {
                     int x = square.getX() * getTileSize() - left;
                     int y = square.getY() * getTileSize() - top;
@@ -314,7 +314,7 @@ public class GameplayScreen extends GenericScreen implements FileEventListener, 
                 }
             }
 
-            public synchronized void scale(double scaleMultiplier) {
+            private synchronized void scale(double scaleMultiplier) {
                 this.top *= scaleMultiplier;
                 this.left *= scaleMultiplier;
                 this.width *= scaleMultiplier;
